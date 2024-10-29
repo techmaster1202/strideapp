@@ -29,10 +29,19 @@ export const authSlice = createSlice({
       state.darkMode = false;
       state.isLoggedIn = false;
     },
+    userProfileUpdated: (state, action: PayloadAction<IAuthState>) => {
+      if (action.payload.user) {
+        state.user = {
+          ...state.user,
+          ...action.payload.user,
+        };
+      }
+    },
   },
 });
 
-export const {userLoggedIn, userLoggedOut} = authSlice.actions;
+export const {userLoggedIn, userLoggedOut, userProfileUpdated} =
+  authSlice.actions;
 
 export const selectAuthState = (state: RootState): IAuthState => state.auth;
 

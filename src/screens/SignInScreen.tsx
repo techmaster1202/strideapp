@@ -1,44 +1,26 @@
 import React, {useState} from 'react';
-import {
-  Button,
-  Surface,
-  TextInput,
-  useTheme,
-  Snackbar,
-  Text,
-  ActivityIndicator,
-} from 'react-native-paper';
-import {StyleSheet, Dimensions, StatusBar, View} from 'react-native';
+import {Button, Surface, TextInput, useTheme, Text} from 'react-native-paper';
+import {View} from 'react-native';
 import {useForm, Controller} from 'react-hook-form';
 import * as Animatable from 'react-native-animatable';
 import {useAppDispatch} from '../store/hook';
 import * as AppConstants from '../constants/constants.ts';
-import {ImageOverlay} from '../components/image-overlay.tsx';
 import {login} from '../services/authService.ts';
-import {Navigation} from '../types/index.ts';
+import {Props, SignInFormData} from '../types/index.ts';
 import Logo from '../components/Logo.tsx';
 import {Background} from '../components/Background.tsx';
-import Header from '../components/Header.tsx';
-import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {userLoggedIn} from '../store/authSlice';
 import {IAuthState} from '../interfaces/IAuthentication.ts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {STORAGE_KEY} from '../utils/constantKey.ts';
-
-type SignInFormData = {
-  emailAddress: string;
-  password: string;
-};
-
-type Props = {
-  navigation: Navigation;
-};
+import {createGlobalStyles} from '../utils/styles.ts';
+import Toast from 'react-native-toast-message';
+import CustomActivityIndicator from '../components/CustomActivityIndicator.tsx';
 
 export default function SignInScreen({navigation}: Props) {
   const theme = useTheme();
-  const [showSnack, setShowSnack] = useState(false);
+  const globalStyles = createGlobalStyles(theme);
   const [loading, setLoading] = useState(false);
-  const [snackMessage, setSnackMessage] = useState('');
   const dispatch = useAppDispatch();
   const {
     control,
@@ -49,8 +31,6 @@ export default function SignInScreen({navigation}: Props) {
   const onSubmit = (data: SignInFormData) => {
     handleSignIn(data.emailAddress, data.password);
   };
-
-  const onDismissSnackBar = () => setShowSnack(false);
 
   const handleSignIn = async (email: string, password: string) => {
     setLoading(true);
@@ -67,35 +47,27 @@ export default function SignInScreen({navigation}: Props) {
           dispatch(userLoggedIn(user));
           AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(user));
         }
-        setSnackMessage(response.message);
-        setShowSnack(true);
+        Toast.show({
+          type: response.success ? 'success' : 'error',
+          text1: response.message,
+        });
         setLoading(false);
         return;
       })
       .catch(error => {
-        setSnackMessage(
-          error.message || 'Something went wrong, please try again.',
-        );
-        setShowSnack(true);
+        Toast.show({
+          type: 'error',
+          text1: error.message || 'Something went wrong, please try again.',
+        });
         setLoading(false);
       });
   };
 
   return (
     <Background>
-      <StatusBar barStyle="light-content" />
-      <Animatable.View
-        style={[styles.contentContainer]}
-        animation="fadeInUpBig">
-        <Surface style={styles.surface} elevation={1}>
-          <View
-            style={{
-              width: '100%',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-            <Logo />
-          </View>
+      <Animatable.View animation="fadeInUpBig">
+        <Surface style={globalStyles.surface} elevation={3}>
+          <Logo />
           <Controller
             control={control}
             rules={{
@@ -110,19 +82,18 @@ export default function SignInScreen({navigation}: Props) {
                 mode="outlined"
                 placeholder="Email Address"
                 textContentType="emailAddress"
-                style={styles.textInput}
+                style={globalStyles.textInput}
               />
             )}
             name="emailAddress"
           />
-          <View style={styles.errorField}>
+          <View style={globalStyles.errorField}>
             {errors.emailAddress && (
-              <Text style={{color: theme.colors.error}}>
+              <Text style={globalStyles.errorText}>
                 {AppConstants.ERROR_EmailIsRequired}
               </Text>
             )}
           </View>
-
           <Controller
             control={control}
             rules={{
@@ -139,14 +110,14 @@ export default function SignInScreen({navigation}: Props) {
                 value={value}
                 secureTextEntry
                 textContentType="password"
-                style={styles.textInput}
+                style={globalStyles.textInput}
               />
             )}
             name="password"
           />
-          <View style={styles.errorField}>
+          <View style={globalStyles.errorField}>
             {errors.password && (
-              <Text style={{color: theme.colors.error}}>
+              <Text style={globalStyles.errorText}>
                 {AppConstants.ERROR_PasswordIsRequired}
               </Text>
             )}
@@ -156,68 +127,26 @@ export default function SignInScreen({navigation}: Props) {
             mode="contained"
             compact
             onPress={handleSubmit(onSubmit)}
-            style={styles.button}
-            loading={loading}>
+            style={globalStyles.defaultButton}>
             {AppConstants.TITLE_Login}
           </Button>
           <Button
             mode="text"
             compact
+            onPress={() => navigation.navigate('ForgotPassword')}
+            style={globalStyles.defaultButton}>
+            {AppConstants.LABEL_ForgotPassword}
+          </Button>
+          <Button
+            mode="text"
+            compact
             onPress={() => navigation.navigate('SignUp')}
-            style={styles.button}>
+            style={globalStyles.defaultButton}>
             {AppConstants.LABEL_NotAUser}
           </Button>
         </Surface>
       </Animatable.View>
-      <Snackbar
-        visible={showSnack}
-        onDismiss={onDismissSnackBar}
-        action={{
-          label: 'Close',
-          onPress: () => {
-            onDismissSnackBar();
-          },
-        }}>
-        {snackMessage}
-      </Snackbar>
+      <CustomActivityIndicator loading={loading} />
     </Background>
   );
 }
-
-const {width, height} = Dimensions.get('screen');
-const container_height = height * 0.6;
-const container_width = width * 0.85;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  contentContainer: {
-    marginHorizontal: 10,
-    marginVertical: 20,
-  },
-  surface: {
-    justifyContent: 'flex-start',
-    paddingVertical: 20,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    width: container_width,
-  },
-  button: {
-    marginVertical: 10,
-    width: '100%',
-    borderRadius: 5,
-  },
-  textInput: {
-    width: '100%',
-  },
-  errorField: {
-    width: '100%',
-    height: 25,
-    display: 'flex',
-    justifyContent: 'flex-start',
-  },
-});

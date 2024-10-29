@@ -1,21 +1,21 @@
-import * as React from 'react';
+import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import * as AppConstants from '../constants/constants';
 import SignInScreen from '../screens/SignInScreen';
 import SignUpScreen from '../screens/SignUpScreen';
-import ThemeToggle from './ThemeToggle';
+import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
 
 const Stack = createNativeStackNavigator();
 
+const screenOptions = {
+  headerShown: false,
+};
+
 export default function PublicStack() {
   return (
-    <Stack.Navigator
-      initialRouteName="SignIn"
-      screenOptions={{
-        headerShown: false,
-      }}>
+    <Stack.Navigator initialRouteName="SignIn" screenOptions={screenOptions}>
       <Stack.Screen name="SignIn" component={SignInScreen} />
       <Stack.Screen name="SignUp" component={SignUpScreen} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
     </Stack.Navigator>
   );
 }
