@@ -96,3 +96,16 @@ export const deleteUserProfile = async (
     throw error.response ? error.response.data : error.message;
   }
 };
+
+export const resetUserPassword = async (
+  id: number | null,
+): Promise<APIResponse> => {
+  try {
+    const response = await axiosInstance.post<APIResponse>('reset_pasword', {
+      id: id,
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error.response ? error.response.data : error.message;
+  }
+};

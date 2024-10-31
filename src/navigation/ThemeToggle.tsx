@@ -10,7 +10,7 @@ const ThemeToggle = (): React.ReactNode => {
   return (
     <Button
       icon="theme-light-dark"
-      mode="contained-tonal"
+      mode="contained"
       onPress={toggleTheme}
       style={globalStyles.defaultButton}
       compact>

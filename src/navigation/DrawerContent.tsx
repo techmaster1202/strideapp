@@ -4,19 +4,26 @@ import {View, StyleSheet, Dimensions, TouchableOpacity} from 'react-native';
 import {Text, Button, Divider, useTheme, Avatar} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import {useNavigationState} from '@react-navigation/native';
 import ThemeToggle from './ThemeToggle';
 import {useAppDispatch, useAppSelector} from '../store/hook';
 import {selectAuthState, userLoggedOut} from '../store/authSlice';
 import Logo from '../components/Logo';
 import {STORAGE_KEY} from '../utils/constantKey';
-import {Props} from '../types';
+import {Navigation} from '../types';
 import {createGlobalStyles} from '../utils/styles';
-
+import * as AppConstants from '../constants/constants.ts';
+type Props = {
+  state: any;
+  navigation: Navigation;
+};
 const DrawerContent = (props: Props) => {
   const theme = useTheme();
   const globalStyles = createGlobalStyles(theme);
   const dispatch = useAppDispatch();
   const authState = useAppSelector(selectAuthState);
+
+  const currentRoute = props.state.routes[props.state.index].name;
 
   const firstName = authState?.user?.first_name ?? '';
   const lastName = authState?.user?.last_name ?? '';
@@ -44,15 +51,15 @@ const DrawerContent = (props: Props) => {
         <View
           style={{
             ...styles.drawerHeader,
-            backgroundColor: theme.colors.primaryContainer,
+            backgroundColor: theme.colors.secondaryContainer,
           }}>
           <Logo />
           <TouchableOpacity
             onPress={() => props.navigation.navigate('Profile')}>
             <View style={styles.profileNavigator}>
               <Avatar.Image size={40} source={{uri: avatarUrl}} />
-              <Text variant="bodyLarge" style={{color: theme.colors.primary}}>
-                Welcome {firstName} {lastName}
+              <Text variant="titleMedium" style={{color: theme.colors.primary}}>
+                {AppConstants.TITLE_Welcome} {firstName} {lastName}
               </Text>
             </View>
           </TouchableOpacity>
@@ -65,15 +72,16 @@ const DrawerContent = (props: Props) => {
             <DrawerItem
               key={label}
               label={label}
+              activeTintColor={theme.colors.primary}
+              inactiveTintColor={theme.colors.secondary}
               icon={({color, size}) => (
-                <Icon name={icon} color={color} size={size} />
+                <Icon name={icon} color={theme.colors.secondary} size={size} />
               )}
               onPress={() => props.navigation.navigate(screen)}
+              focused={currentRoute === screen}
             />
           ))}
         </View>
-
-        <Divider style={styles.divider} />
 
         <View style={styles.drawerFooter}>
           <View style={styles.drawerItem}>

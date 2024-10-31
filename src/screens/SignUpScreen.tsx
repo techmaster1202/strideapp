@@ -85,12 +85,7 @@ export default function SignUpScreen({navigation}: Props) {
   return (
     <Background>
       <Animatable.View animation="fadeInUpBig">
-        <Surface
-          style={{
-            ...globalStyles.surface,
-            height: height * 0.8,
-          }}
-          elevation={3}>
+        <Surface style={globalStyles.surface} elevation={3}>
           <ScrollView alwaysBounceVertical={true}>
             <Logo />
             <Controller
@@ -215,7 +210,7 @@ export default function SignUpScreen({navigation}: Props) {
                   onChangeText={onChange}
                   value={value}
                   mode="outlined"
-                  placeholder={AppConstants.LABEL_EmailAddress}
+                  placeholder={AppConstants.PLACEHOLDER_Email}
                   textContentType="emailAddress"
                   style={globalStyles.textInput}
                 />
@@ -306,20 +301,22 @@ export default function SignUpScreen({navigation}: Props) {
                   </Text>
                 )}
             </View>
-            <Button
-              mode="contained"
-              compact
-              onPress={handleSubmit(onSubmit)}
-              style={globalStyles.defaultButton}>
-              {AppConstants.TITLE_Register}
-            </Button>
-            <Button
-              mode="text"
-              compact
-              onPress={() => navigation.navigate('SignIn')}
-              style={globalStyles.defaultButton}>
-              {AppConstants.LABEL_AlreadyAUser}
-            </Button>
+            <View style={{gap: 10, marginTop: 20}}>
+              <Button
+                mode="contained"
+                compact
+                onPress={handleSubmit(onSubmit)}
+                style={globalStyles.defaultButton}>
+                {AppConstants.TITLE_Register}
+              </Button>
+              <Button
+                mode="text"
+                compact
+                onPress={() => navigation.navigate('SignIn')}
+                style={globalStyles.defaultButton}>
+                {AppConstants.LABEL_AlreadyAUser}
+              </Button>
+            </View>
           </ScrollView>
         </Surface>
       </Animatable.View>

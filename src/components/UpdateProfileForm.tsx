@@ -117,7 +117,7 @@ const UpdateProfileForm = () => {
 
   return (
     <View style={globalStyles.formSection}>
-      <PageTitle>{'Update Profile'}</PageTitle>
+      <PageTitle>{AppConstants.TITLE_UpdateProfile}</PageTitle>
       <Controller
         control={control}
         rules={{
@@ -230,14 +230,14 @@ const UpdateProfileForm = () => {
         compact
         onPress={handleSubmit(onSubmit)}
         style={globalStyles.defaultButton}>
-        {AppConstants.LABEL_Save}
+        {AppConstants.TITLE_Save}
       </Button>
       <Button
         mode="contained"
         compact
         onPress={showModal}
         style={[globalStyles.dangerButton, {marginTop: 15}]}>
-        {AppConstants.LABEL_DeleteAccount}
+        {AppConstants.TITLE_DeleteAccount}
       </Button>
 
       <Modal isVisible={visible} style={globalStyles.modalContainerBack}>
@@ -253,13 +253,13 @@ const UpdateProfileForm = () => {
               onPress={deleteUser}
               mode="contained"
               style={globalStyles.dangerModalButton}>
-              {AppConstants.LABEL_DeleteRecord}
+              {AppConstants.TITLE_DeleteRecord}
             </Button>
             <Button
               onPress={hideModal}
               mode="contained"
               style={globalStyles.defaultModalButton}>
-              {AppConstants.LABEL_Cancel}
+              {AppConstants.TITLE_Cancel}
             </Button>
           </View>
         </View>

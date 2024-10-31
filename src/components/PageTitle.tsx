@@ -11,7 +11,7 @@ export default function PageTitle({children}: Props) {
   const globalStyles = createGlobalStyles(theme);
 
   return (
-    <Text style={globalStyles.primaryTitleText} variant="titleMedium">
+    <Text style={globalStyles.primaryTitleText} variant="labelLarge">
       {children}
     </Text>
   );

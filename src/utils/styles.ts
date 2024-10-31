@@ -12,7 +12,7 @@ export const createGlobalStyles = (theme: MD3Theme) => {
       justifyContent: 'flex-start',
       alignItems: 'center',
       padding: 15,
-      backgroundColor: theme.colors.primaryContainer,
+      backgroundColor: theme.colors.background,
     },
     surface: {
       justifyContent: 'flex-start',
@@ -20,7 +20,7 @@ export const createGlobalStyles = (theme: MD3Theme) => {
       paddingHorizontal: 20,
       borderRadius: 5,
       width: container_width,
-      backgroundColor: theme.colors.primaryContainer, // theme-based background color
+      backgroundColor: theme.colors.background,
     },
     errorField: {
       width: '100%',
@@ -36,7 +36,7 @@ export const createGlobalStyles = (theme: MD3Theme) => {
       marginBottom: 30,
     },
     primaryTitleText: {
-      color: theme.colors.onPrimaryContainer,
+      color: theme.colors.primary,
     },
     errorText: {
       color: theme.colors.error,
@@ -55,12 +55,12 @@ export const createGlobalStyles = (theme: MD3Theme) => {
     },
     defaultModalButton: {
       borderRadius: 5,
-      width: 150,
+      width: 120,
     },
     dangerModalButton: {
       borderRadius: 5,
       backgroundColor: theme.colors.error,
-      width: 150,
+      width: 120,
     },
     modalContainerBack: {
       flex: 1,
@@ -75,7 +75,7 @@ export const createGlobalStyles = (theme: MD3Theme) => {
       height: 200,
       justifyContent: 'space-between',
       alignItems: 'center',
-      backgroundColor: theme.colors.primaryContainer,
+      backgroundColor: theme.colors.background,
     },
     modalButtonGroup: {
       flex: 1,

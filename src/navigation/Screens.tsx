@@ -1,11 +1,17 @@
-import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
-import RequestScreen from '../screens/RequestScreen';
+import CalendarScreen from '../screens/CalendarScreen';
+import ClientScreen from '../screens/ClientScreen';
+import PropertyScreen from '../screens/PropertyScreen';
+import CarScreen from '../screens/CarScreen';
+import ManagerScreen from '../screens/ManagerScreen';
+import UsersStack from './UsersStack';
+import NotificationScreen from '../screens/NotificationScreen';
+import RoleScreen from '../screens/RoleScreen';
 
 const Screens = [
   {
     name: 'Calendar',
-    component: HomeScreen,
+    component: CalendarScreen,
     icon: 'calendar',
   },
   {
@@ -15,37 +21,37 @@ const Screens = [
   },
   {
     name: 'Clients',
-    component: RequestScreen,
+    component: ClientScreen,
     icon: 'account-group',
   },
   {
     name: 'Properties',
-    component: RequestScreen,
+    component: PropertyScreen,
     icon: 'home-city',
   },
   {
     name: 'Cars',
-    component: RequestScreen,
+    component: CarScreen,
     icon: 'car',
   },
   {
     name: 'Managers',
-    component: RequestScreen,
+    component: ManagerScreen,
     icon: 'account-tie',
   },
   {
     name: 'Users',
-    component: RequestScreen,
+    component: UsersStack,
     icon: 'account',
   },
   {
     name: 'Notifications',
-    component: RequestScreen,
+    component: NotificationScreen,
     icon: 'bell',
   },
   {
     name: 'Roles',
-    component: RequestScreen,
+    component: RoleScreen,
     icon: 'account-cog',
   },
 ];

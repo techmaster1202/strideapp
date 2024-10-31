@@ -1,7 +1,9 @@
 import {Theme} from '@react-navigation/native';
 
 export type Navigation = {
-  navigate: (scene: string) => void;
+  openDrawer(): void;
+  goBack(): void;
+  navigate: (scene: string, params?: {[key: string]: any}) => void;
 };
 
 export interface LoginRequest {
@@ -25,7 +27,7 @@ export interface LoginResponse {
 export interface APIResponse {
   success: boolean;
   message: string;
-  data: LoginResponse;
+  data: any;
 }
 
 export interface UserProfile {
@@ -61,6 +63,15 @@ export interface SignUpFormData {
   confirmPassword: string;
 }
 
+export interface UserDetailFormData {
+  id: number;
+  firstName: string;
+  lastName: string;
+  emailAddress: string;
+  password: string;
+  role: string;
+}
+
 export interface UpdateProfileFormData {
   firstName: string;
   lastName: string;
@@ -71,4 +82,33 @@ export interface UpdatePasswordFormData {
   oldPassword: string;
   newPassword: string;
   confirmPassword: string;
+}
+
+export interface Role {
+  name: string;
+}
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  roles: Role[];
+  createdDate: string;
+  phone: string;
+  rate: string;
+  acct: string;
+  registerDate: string;
+  lastLoginDate: string;
+  cancelDate: string;
+  stripeId: string;
+  payStatus: string;
+}
+
+export interface RoleOption {
+  value: string;
+  label: string;
+}
+
+export interface UpdateUserScreenProps {
+  navigation: Navigation;
+  route: any;
 }

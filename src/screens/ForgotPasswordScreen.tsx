@@ -96,21 +96,23 @@ export default function SignUpScreen({navigation}: Props) {
               )}
           </View>
 
-          <Button
-            mode="contained"
-            compact
-            onPress={handleSubmit(onSubmit)}
-            style={globalStyles.defaultButton}>
-            {AppConstants.LABEL_SendPasswordResetLink}
-          </Button>
+          <View style={{gap: 10, marginTop: 20}}>
+            <Button
+              mode="contained"
+              compact
+              onPress={handleSubmit(onSubmit)}
+              style={globalStyles.defaultButton}>
+              {AppConstants.TITLE_SendResetLink}
+            </Button>
 
-          <Button
-            mode="text"
-            compact
-            onPress={() => navigation.navigate('SignIn')}
-            style={globalStyles.defaultButton}>
-            {AppConstants.LABEL_goBackToLogin}
-          </Button>
+            <Button
+              mode="text"
+              compact
+              onPress={() => navigation.navigate('SignIn')}
+              style={globalStyles.defaultButton}>
+              {AppConstants.LABEL_goBackToLogin}
+            </Button>
+          </View>
         </Surface>
       </Animatable.View>
       <CustomActivityIndicator loading={loading} />

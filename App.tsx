@@ -19,6 +19,7 @@ import {appStore} from './src/store/appStore';
 import AppNavigator from './src/navigation/AppNavigator';
 import {THEME_STORAGE_KEY} from './src/utils/constantKey';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import {lightTheme, darkTheme} from './src/utils/customTheme';
 
 const {LightTheme, DarkTheme} = adaptNavigationTheme({
   reactNavigationLight: NavigationDefaultTheme,
@@ -27,6 +28,9 @@ const {LightTheme, DarkTheme} = adaptNavigationTheme({
 
 const CombinedDefaultTheme = merge(MD3LightTheme, LightTheme);
 const CombinedDarkTheme = merge(MD3DarkTheme, DarkTheme);
+
+const customLightTheme = merge(CombinedDefaultTheme, lightTheme);
+const customDarkTheme = merge(CombinedDarkTheme, darkTheme);
 
 export default function App() {
   const [isThemeDark, setIsThemeDark] = useState(false);
@@ -64,7 +68,7 @@ export default function App() {
     [isThemeDark],
   );
 
-  const appTheme = isThemeDark ? CombinedDarkTheme : CombinedDefaultTheme;
+  const appTheme = isThemeDark ? customDarkTheme : customLightTheme;
 
   return (
     <GestureHandlerRootView>

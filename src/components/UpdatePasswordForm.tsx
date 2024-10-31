@@ -42,7 +42,6 @@ const UpdatePasswordForm = () => {
     setLoading(true);
     const email = authState.user?.email;
     if (email) {
-      console.log('email  ====> ', email);
       await updatePassword(oldPassword, newPassword, confirmPassword, email)
         .then(response => {
           Toast.show({
@@ -67,7 +66,7 @@ const UpdatePasswordForm = () => {
 
   return (
     <View style={globalStyles.formSection}>
-      <PageTitle>{'Update Password'}</PageTitle>
+      <PageTitle>{AppConstants.TITLE_UpdatePassword}</PageTitle>
       <Controller
         control={control}
         rules={{
@@ -171,7 +170,7 @@ const UpdatePasswordForm = () => {
         compact
         onPress={handleSubmit(onSubmit)}
         style={globalStyles.defaultButton}>
-        {AppConstants.LABEL_Save}
+        {AppConstants.TITLE_Save}
       </Button>
       <CustomActivityIndicator loading={loading} />
     </View>

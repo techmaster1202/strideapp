@@ -123,27 +123,29 @@ export default function SignInScreen({navigation}: Props) {
             )}
           </View>
 
-          <Button
-            mode="contained"
-            compact
-            onPress={handleSubmit(onSubmit)}
-            style={globalStyles.defaultButton}>
-            {AppConstants.TITLE_Login}
-          </Button>
-          <Button
-            mode="text"
-            compact
-            onPress={() => navigation.navigate('ForgotPassword')}
-            style={globalStyles.defaultButton}>
-            {AppConstants.LABEL_ForgotPassword}
-          </Button>
-          <Button
-            mode="text"
-            compact
-            onPress={() => navigation.navigate('SignUp')}
-            style={globalStyles.defaultButton}>
-            {AppConstants.LABEL_NotAUser}
-          </Button>
+          <View style={{gap: 10, marginTop: 20}}>
+            <Button
+              mode="contained"
+              compact
+              onPress={handleSubmit(onSubmit)}
+              style={[globalStyles.defaultButton]}>
+              {AppConstants.TITLE_Login}
+            </Button>
+            <Button
+              mode="text"
+              compact
+              onPress={() => navigation.navigate('ForgotPassword')}
+              style={[globalStyles.defaultButton]}>
+              {AppConstants.LABEL_ForgotPassword}
+            </Button>
+            <Button
+              mode="text"
+              compact
+              onPress={() => navigation.navigate('SignUp')}
+              style={[globalStyles.defaultButton]}>
+              {AppConstants.LABEL_NotAUser}
+            </Button>
+          </View>
         </Surface>
       </Animatable.View>
       <CustomActivityIndicator loading={loading} />
