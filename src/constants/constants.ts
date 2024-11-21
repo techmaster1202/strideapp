@@ -11,6 +11,7 @@ export const TITLE_UpdateProfile = 'UPDATE PROFILE';
 export const TITLE_UpdatePassword = 'UPDATE PASSWORD';
 export const TITLE_AddUser = 'ADD USER';
 export const TITLE_UpdateUser = 'UPDATE USER';
+export const TITLE_UpdateManager = 'UPDATE MANAGER';
 export const TITLE_Calendar = 'CALENDAR';
 export const TITLE_Profile = 'PROFILE';
 export const TITLE_Clients = 'CLIENTS';

@@ -10,19 +10,19 @@ import {
   IconButton,
 } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import {createGlobalStyles} from '../utils/styles';
-import {Props, User} from '../types';
-import * as AppConstants from '../constants/constants.ts';
-import {getUserList} from '../services/usersService.ts';
-import CustomActivityIndicator from '../components/CustomActivityIndicator.tsx';
+import {createGlobalStyles} from '../../utils/styles';
+import {Props, User} from '../../types';
+import * as AppConstants from '../../constants/constants.ts';
+import {getUserList} from '../../services/usersService.ts';
+import CustomActivityIndicator from '../../components/CustomActivityIndicator.tsx';
 import Modal from 'react-native-modal';
-import PageTitle from '../components/PageTitle.tsx';
-import {deleteUserProfile, resetUserPassword} from '../services/authService.ts';
+import PageTitle from '../../components/PageTitle.tsx';
+import {deleteUserProfile, resetUserPassword} from '../../services/authService.ts';
 import Toast from 'react-native-toast-message';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import PageHeader from '../components/PageHeader.tsx';
+import PageHeader from '../../components/PageHeader.tsx';
 import {useFocusEffect} from '@react-navigation/native';
-import ConfirmModal from '../components/ConfirmModal.tsx';
+import ConfirmModal from '../../components/ConfirmModal.tsx';
 
 type UserCardProps = {
   item: User;

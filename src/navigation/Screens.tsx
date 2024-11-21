@@ -5,6 +5,7 @@ import PropertyScreen from '../screens/PropertyScreen';
 import CarScreen from '../screens/CarScreen';
 import ManagerScreen from '../screens/ManagerScreen';
 import UsersStack from './UsersStack';
+import ManagersStack from './ManagersStack';
 import NotificationScreen from '../screens/NotificationScreen';
 import RoleScreen from '../screens/RoleScreen';
 
@@ -36,7 +37,12 @@ const Screens = [
   },
   {
     name: 'Managers',
-    component: ManagerScreen,
+    component: ManagersStack,
+    icon: 'account-tie',
+  },
+  {
+    name: 'Employees',
+    component: ManagersStack,
     icon: 'account-tie',
   },
   {

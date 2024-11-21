@@ -2,28 +2,22 @@ import React, {useEffect, useState} from 'react';
 import {View} from 'react-native';
 import {Button, Text, TextInput, useTheme} from 'react-native-paper';
 import {Dropdown} from 'react-native-paper-dropdown';
-import Toast from 'react-native-toast-message';
+import {createGlobalStyles} from '../../utils/styles.ts';
+import {Props, RoleOption, UserDetailFormData} from '../../types/index.ts';
+import * as AppConstants from '../../constants/constants.ts';
+import DetailPageHeader from '../../components/DetailPageHeader.tsx';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {Controller, useForm} from 'react-hook-form';
-import {createGlobalStyles} from '../utils/styles.ts';
-import {
-  RoleOption,
-  UpdateUserScreenProps,
-  UserDetailFormData,
-} from '../types/index.ts';
-import * as AppConstants from '../constants/constants.ts';
-import DetailPageHeader from '../components/DetailPageHeader.tsx';
-import {useValidation} from '../hooks/useValidation.ts';
-import {getAllRoles, updateUser} from '../services/usersService.ts';
-import CustomActivityIndicator from '../components/CustomActivityIndicator.tsx';
+import {useValidation} from '../../hooks/useValidation.ts';
+import {getAllRoles, createUser} from '../../services/usersService.ts';
+import Toast from 'react-native-toast-message';
+import CustomActivityIndicator from '../../components/CustomActivityIndicator.tsx';
 
-const UpdateUserScreen = ({route, navigation}: UpdateUserScreenProps) => {
-  const {id, email, name, roles} = route.params;
-
+const AddUserScreen = ({navigation}: Props) => {
   const theme = useTheme();
   const globalStyles = createGlobalStyles(theme);
   const {validateEmail} = useValidation();
-  const [userRoles, setUserRoles] = useState<RoleOption[]>([]);
+  const [roles, setRoles] = useState<RoleOption[]>([]);
   const [loading, setLoading] = useState(false);
 
   const {
@@ -38,8 +32,7 @@ const UpdateUserScreen = ({route, navigation}: UpdateUserScreenProps) => {
     if (loading) return;
 
     setLoading(true);
-    await updateUser(
-      data.id,
+    await createUser(
       data.firstName,
       data.lastName,
       data.emailAddress,
@@ -47,6 +40,11 @@ const UpdateUserScreen = ({route, navigation}: UpdateUserScreenProps) => {
     )
       .then(response => {
         if (response.success) {
+          setValue('firstName', '');
+          setValue('lastName', '');
+          setValue('emailAddress', '');
+          setValue('role', '');
+          setValue('password', '');
         }
         Toast.show({
           type: response.success ? 'success' : 'error',
@@ -68,7 +66,7 @@ const UpdateUserScreen = ({route, navigation}: UpdateUserScreenProps) => {
     await getAllRoles()
       .then(response => {
         if (response.success) {
-          setUserRoles(response.data.roles);
+          setRoles(response.data.roles);
         }
       })
       .catch(error => {
@@ -76,24 +74,15 @@ const UpdateUserScreen = ({route, navigation}: UpdateUserScreenProps) => {
       });
   };
 
-  const loadDefaultValue = () => {
-    setValue('firstName', name.split(' ')[0]);
-    setValue('lastName', name.split(' ')[1]);
-    setValue('emailAddress', email);
-    setValue('role', roles[0].id);
-    setValue('id', id);
-  };
-
   useEffect(() => {
     loadRoles();
-    loadDefaultValue();
   }, []);
 
   return (
     <SafeAreaView style={{flex: 1}}>
       <DetailPageHeader
         navigation={navigation}
-        title={AppConstants.TITLE_UpdateUser}
+        title={AppConstants.TITLE_AddUser}
       />
       <View style={[globalStyles.container]}>
         <View style={{width: '100%', marginBottom: 20}}>
@@ -110,7 +99,7 @@ const UpdateUserScreen = ({route, navigation}: UpdateUserScreenProps) => {
                 mode="outlined"
                 label={AppConstants.LABEL_Role}
                 placeholder={AppConstants.LABEL_Role}
-                options={userRoles}
+                options={roles}
                 value={value}
                 onSelect={onChange}
               />
@@ -246,4 +235,4 @@ const UpdateUserScreen = ({route, navigation}: UpdateUserScreenProps) => {
   );
 };
 
-export default UpdateUserScreen;
+export default AddUserScreen;

@@ -35,6 +35,7 @@ const DrawerContent = (props: Props) => {
     {label: 'Properties', icon: 'home-city', screen: 'Properties'},
     {label: 'Cars', icon: 'car', screen: 'Cars'},
     {label: 'Managers', icon: 'account-tie', screen: 'Managers'},
+    {label: 'Employees', icon: 'account-tie', screen: 'Employees'},
     {label: 'Users', icon: 'account', screen: 'Users'},
     {label: 'Notifications', icon: 'bell', screen: 'Notifications'},
     {label: 'Roles', icon: 'account-cog', screen: 'Roles'},

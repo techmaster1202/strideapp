@@ -72,6 +72,14 @@ export interface UserDetailFormData {
   role: string;
 }
 
+export interface CleanerDetailFormData {
+  id: number;
+  firstName: string;
+  lastName: string;
+  emailAddress: string;
+  phoneNumber: string;
+}
+
 export interface UpdateProfileFormData {
   firstName: string;
   lastName: string;
@@ -101,6 +109,15 @@ export interface User {
   cancelDate: string;
   stripeId: string;
   payStatus: string;
+}
+
+export interface Cleaner {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number: string;
+  car_count: number;
 }
 
 export interface RoleOption {
