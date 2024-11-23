@@ -71,6 +71,12 @@ export interface UserDetailFormData {
   password: string;
   role: string;
 }
+export interface ManagerDetailFormData {
+  firstName: string;
+  lastName: string;
+  emailAddress: string;
+  phoneNumber: string;
+}
 
 export interface CleanerDetailFormData {
   id: number;
@@ -118,6 +124,7 @@ export interface Cleaner {
   email: string;
   phone_number: string;
   car_count: number;
+  property_number: number;
 }
 
 export interface RoleOption {

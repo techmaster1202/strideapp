@@ -1,21 +1,40 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {View} from 'react-native';
 import {Button, Text, TextInput, useTheme} from 'react-native-paper';
-import {Dropdown} from 'react-native-paper-dropdown';
 import Toast from 'react-native-toast-message';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {Controller, useForm} from 'react-hook-form';
 import {createGlobalStyles} from '../../utils/styles.ts';
 import {
-  RoleOption,
   UpdateUserScreenProps,
   CleanerDetailFormData,
 } from '../../types/index.ts';
 import * as AppConstants from '../../constants/constants.ts';
 import DetailPageHeader from '../../components/DetailPageHeader.tsx';
 import {useValidation} from '../../hooks/useValidation.ts';
-import {getAllRoles, updateUser} from '../../services/usersService.ts';
+import {
+  deleteFile,
+  getManager,
+  updateManager,
+  uploadAttachmentFile,
+} from '../../services/managersService.ts';
 import CustomActivityIndicator from '../../components/CustomActivityIndicator.tsx';
+import FileUploader from '../../components/FileUploader.tsx';
+
+const getMimeType = (fileName: string) => {
+  const extension = fileName.split('.').pop() as string;
+  const mimeTypes: Record<string, string> = {
+    pdf: 'application/pdf',
+    png: 'image/png',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    doc: 'application/msword',
+    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    txt: 'text/plain',
+    rtf: 'application/rtf',
+  };
+  return mimeTypes[extension] || 'application/octet-stream';
+};
 
 const UpdateManagerScreen = ({route, navigation}: UpdateUserScreenProps) => {
   const {id, email, first_name, last_name, phone_number} = route.params;
@@ -23,27 +42,30 @@ const UpdateManagerScreen = ({route, navigation}: UpdateUserScreenProps) => {
   const theme = useTheme();
   const globalStyles = createGlobalStyles(theme);
   const {validateEmail} = useValidation();
-  const [userRoles, setUserRoles] = useState<RoleOption[]>([]);
   const [loading, setLoading] = useState(false);
+  const [aggreements, setAgreements] = useState<Record<string, any>[]>([]);
+  const [insurances, setInsurances] = useState<Record<string, any>[]>([]);
+  const [others, setOthers] = useState<Record<string, any>[]>([]);
 
   const {
     control,
     handleSubmit,
     formState: {errors},
-    watch,
     setValue,
   } = useForm<CleanerDetailFormData>();
 
   const onSubmit = async (data: CleanerDetailFormData) => {
-    if (loading) return;
+    if (loading) {
+      return;
+    }
 
     setLoading(true);
-    await updateUser(
+    await updateManager(
       data.id,
       data.firstName,
       data.lastName,
       data.emailAddress,
-      data.role,
+      data.phoneNumber,
     )
       .then(response => {
         if (response.success) {
@@ -64,17 +86,86 @@ const UpdateManagerScreen = ({route, navigation}: UpdateUserScreenProps) => {
       });
   };
 
-  const loadDefaultValue = () => {
+  const onDeleteFile = async (fileId: string) => {
+    try {
+      await deleteFile(fileId);
+      await getManager(id).then(res => {
+        setAgreements(res.data?.cleaner?.agreements);
+        setInsurances(res.data?.cleaner?.insurances);
+        setOthers(res.data?.cleaner?.others);
+      });
+      Toast.show({
+        type: 'success',
+        text1: 'file successfully deleted',
+      });
+    } catch (error: any) {
+      Toast.show({
+        type: 'error',
+        text1: error.message || 'Something went wrong, please try again.',
+      });
+    }
+  };
+
+  const uploadFile = async (
+    file_name: string,
+    file: Record<string, string>,
+  ) => {
+    try {
+      const formData = new FormData();
+      console.log(file);
+      formData.append(file_name, {
+        uri: file.url,
+        name: file.file_name,
+        type: getMimeType(file.file_name), // Adjust based on file type
+      });
+      let url = '';
+      let res: any = null;
+      switch (file_name) {
+        case 'pond_agreement':
+          url = `/manager/${id}/upload_agreement`;
+          res = await uploadAttachmentFile(url, formData);
+          setAgreements(p => [...p, res]);
+          console.log(res);
+          break;
+        case 'pond_insurance':
+          url = `/manager/${id}/upload_insurance`;
+          res = await uploadAttachmentFile(url, formData);
+          setInsurances(p => [...p, res]);
+          break;
+        case 'pond_other':
+          url = `/manager/${id}/upload_other`;
+          res = await uploadAttachmentFile(url, formData);
+          setOthers(p => [...p, res]);
+          break;
+      }
+      Toast.show({
+        type: 'success',
+        text1: 'file successfully uploaded.',
+      });
+    } catch (error: any) {
+      Toast.show({
+        type: 'error',
+        text1: error.message || 'Something went wrong, please try again.',
+      });
+    }
+  };
+
+  const loadDefaultValue = useCallback(() => {
     setValue('firstName', first_name);
     setValue('lastName', last_name);
     setValue('emailAddress', email);
     setValue('phoneNumber', phone_number);
     setValue('id', id);
-  };
+  }, []);
 
   useEffect(() => {
+    getManager(id).then(res => {
+      setAgreements(res.data?.cleaner?.agreements);
+      setInsurances(res.data?.cleaner?.insurances);
+      setOthers(res.data?.cleaner?.others);
+    });
     loadDefaultValue();
-  }, []);
+  }, [loadDefaultValue, id]);
 
   return (
     <SafeAreaView style={{flex: 1}}>
@@ -82,6 +173,7 @@ const UpdateManagerScreen = ({route, navigation}: UpdateUserScreenProps) => {
         navigation={navigation}
         title={AppConstants.TITLE_UpdateManager}
       />
+
       <View style={[globalStyles.container]}>
         <View style={{width: '100%', marginBottom: 20}}>
           <Controller
@@ -200,32 +292,47 @@ const UpdateManagerScreen = ({route, navigation}: UpdateUserScreenProps) => {
                 message: AppConstants.ERROR_PhoneNumberIsRequired,
                 value: true,
               },
-              pattern: {
-                value: /^[A-Za-z]+$/i,
-                message: AppConstants.ERROR_InvalidName,
-              },
             }}
             render={({field: {onChange, onBlur, value}}) => (
               <TextInput
-                label={AppConstants.LABEL_LastName}
+                label={AppConstants.LABEL_MobilePhone}
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
                 mode="outlined"
-                placeholder={AppConstants.PLACEHOLDER_LastName}
-                textContentType="name"
+                placeholder={AppConstants.PLACEHOLDER_Phone}
+                textContentType="none"
                 style={globalStyles.textInput}
               />
             )}
-            name="lastName"
+            name="phoneNumber"
           />
           <View style={globalStyles.errorField}>
-            {errors.lastName?.message && (
+            {errors.phoneNumber?.message && (
               <Text style={globalStyles.errorText}>
-                {errors.lastName?.message}
+                {errors.phoneNumber?.message}
               </Text>
             )}
           </View>
+
+          <FileUploader
+            label="Company's Agreement"
+            existingFiles={aggreements}
+            deleteFile={onDeleteFile}
+            uploadFile={file => uploadFile('pond_agreement', file)}
+          />
+          <FileUploader
+            label="Insurance"
+            deleteFile={onDeleteFile}
+            uploadFile={file => uploadFile('pond_insurance', file)}
+            existingFiles={insurances}
+          />
+          <FileUploader
+            label="Other Documents"
+            deleteFile={onDeleteFile}
+            uploadFile={file => uploadFile('pond_other', file)}
+            existingFiles={others}
+          />
         </View>
 
         <Button

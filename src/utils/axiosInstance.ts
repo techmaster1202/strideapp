@@ -1,12 +1,25 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import {STORAGE_KEY} from './constantKey';
 
 const axiosInstance = axios.create({
-  baseURL: 'http://10.0.2.2:8000/api/', // Replace with your Laravel API base URL
+  baseURL: 'http://192.168.0.105:8000/api/', // Replace with your Laravel API base URL
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
+axiosInstance.interceptors.request.use(
+  async config => {
+    const data = await AsyncStorage.getItem(STORAGE_KEY);
+    if (data) {
+      const user = JSON.parse(data);
+      config.headers.Authorization = `Bearer ${user.token}`;
+    }
+    return config;
+  },
+  error => Promise.reject(error),
+);
 // Add a request interceptor to attach tokens or other headers
 // axiosInstance.interceptors.request.use(
 //   config => {

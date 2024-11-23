@@ -10,9 +10,9 @@ import {Controller, useForm} from 'react-hook-form';
 import {useValidation} from '../../hooks/useValidation.ts';
 import Toast from 'react-native-toast-message';
 import CustomActivityIndicator from '../../components/CustomActivityIndicator.tsx';
-import {createManager} from '../../services/managersService.ts';
+import {createCleaner} from '../../services/cleanersService.ts';
 
-const AddManagerScreen = ({navigation}: Props) => {
+const AddEmployeeScreen = ({navigation}: Props) => {
   const theme = useTheme();
   const globalStyles = createGlobalStyles(theme);
   const {validateEmail} = useValidation();
@@ -31,7 +31,7 @@ const AddManagerScreen = ({navigation}: Props) => {
     }
 
     setLoading(true);
-    await createManager(
+    await createCleaner(
       data.firstName,
       data.lastName,
       data.emailAddress,
@@ -66,7 +66,7 @@ const AddManagerScreen = ({navigation}: Props) => {
     <SafeAreaView style={{flex: 1}}>
       <DetailPageHeader
         navigation={navigation}
-        title={AppConstants.TITLE_AddManager}
+        title={AppConstants.TITLE_AddEmployee}
       />
       <View style={[globalStyles.container]}>
         <View style={{width: '100%', marginBottom: 20}}>
@@ -229,4 +229,4 @@ const AddManagerScreen = ({navigation}: Props) => {
   );
 };
 
-export default AddManagerScreen;
+export default AddEmployeeScreen;

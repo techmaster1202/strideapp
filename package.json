@@ -23,6 +23,7 @@
     "react-hook-form": "^7.53.1",
     "react-native": "0.75.4",
     "react-native-animatable": "^1.4.0",
+    "react-native-document-picker": "^9.3.1",
     "react-native-gesture-handler": "^2.20.2",
     "react-native-modal": "^13.0.1",
     "react-native-paper": "^5.12.5",

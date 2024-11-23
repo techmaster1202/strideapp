@@ -1,13 +1,13 @@
 import axiosInstance from '../utils/axiosInstance';
 import {APIResponse} from '../types';
 
-export const getManagerList = async (
+export const getCleanerList = async (
   keyword: string,
   page: number,
 ): Promise<APIResponse> => {
   try {
     console.log('keyword =========> ', keyword);
-    const response = await axiosInstance.get<APIResponse>('managers', {
+    const response = await axiosInstance.get<APIResponse>('cleaners', {
       params: {
         q: keyword,
         page: page,
@@ -19,18 +19,9 @@ export const getManagerList = async (
   }
 };
 
-export const getAllRoles = async (): Promise<APIResponse> => {
+export const getCleaner = async (id: number): Promise<APIResponse> => {
   try {
-    const response = await axiosInstance.get<APIResponse>('role_list');
-    return response.data;
-  } catch (error: any) {
-    throw error.response ? error.response.data : error.message;
-  }
-};
-
-export const getManager = async (id: number): Promise<APIResponse> => {
-  try {
-    const response = await axiosInstance.get<APIResponse>(`managers/${id}`);
+    const response = await axiosInstance.get<APIResponse>(`cleaners/${id}`);
     return response.data;
   } catch (error: any) {
     console.log('error', error);
@@ -38,14 +29,14 @@ export const getManager = async (id: number): Promise<APIResponse> => {
   }
 };
 
-export const createManager = async (
+export const createCleaner = async (
   firsName: string,
   lastName: string,
   email: string,
   phoneNumber: string,
 ): Promise<APIResponse> => {
   try {
-    const response = await axiosInstance.post<APIResponse>('managers', {
+    const response = await axiosInstance.post<APIResponse>('cleaners', {
       first_name: firsName,
       last_name: lastName,
       email: email,
@@ -58,7 +49,7 @@ export const createManager = async (
   }
 };
 
-export const updateManager = async (
+export const updateCleaner = async (
   id: number,
   firsName: string,
   lastName: string,
@@ -66,7 +57,7 @@ export const updateManager = async (
   phoneNumber: string,
 ): Promise<APIResponse> => {
   try {
-    const response = await axiosInstance.put<APIResponse>(`managers/${id}`, {
+    const response = await axiosInstance.put<APIResponse>(`cleaners/${id}`, {
       first_name: firsName,
       last_name: lastName,
       email: email,
@@ -79,9 +70,9 @@ export const updateManager = async (
   }
 };
 
-export const deleteManager = async (id: number): Promise<APIResponse> => {
+export const deleteCleaner = async (id: number): Promise<APIResponse> => {
   try {
-    const response = await axiosInstance.delete<APIResponse>(`managers/${id}`);
+    const response = await axiosInstance.delete<APIResponse>(`cleaners/${id}`);
     return response.data;
   } catch (error: any) {
     console.log('error', error.response);
@@ -89,12 +80,12 @@ export const deleteManager = async (id: number): Promise<APIResponse> => {
   }
 };
 
-export const resetManagerPassword = async (
+export const resetCleanerPassword = async (
   id: number | null,
 ): Promise<APIResponse> => {
   try {
     const response = await axiosInstance.post<APIResponse>(
-      `manager/reset_pasword/${id}`,
+      `cleaner/reset_pasword/${id}`,
       {
         id: id,
       },
@@ -109,7 +100,7 @@ export const resetManagerPassword = async (
 export const deleteFile = async (fileId: string) => {
   try {
     const response = await axiosInstance.delete<APIResponse>(
-      `manager/${fileId}/delete_file`,
+      `cleaner/${fileId}/delete_file`,
     );
     return response.data;
   } catch (error: any) {
