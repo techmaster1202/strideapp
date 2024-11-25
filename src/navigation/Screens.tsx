@@ -1,13 +1,13 @@
 import ProfileScreen from '../screens/ProfileScreen';
 import CalendarScreen from '../screens/CalendarScreen';
 import ClientScreen from '../screens/ClientScreen';
-import PropertyScreen from '../screens/PropertyScreen';
 import CarScreen from '../screens/CarScreen';
 import UsersStack from './UsersStack';
 import ManagersStack from './ManagersStack';
 import NotificationScreen from '../screens/NotificationScreen';
 import RoleScreen from '../screens/RoleScreen';
 import EmployeesStack from './EmployeesStack';
+import PropertiesStack from './PropertiesStack';
 
 const Screens = [
   {
@@ -27,7 +27,7 @@ const Screens = [
   },
   {
     name: 'Properties',
-    component: PropertyScreen,
+    component: PropertiesStack,
     icon: 'home-city',
   },
   {

@@ -20,21 +20,7 @@ import {
 } from '../../services/managersService.ts';
 import CustomActivityIndicator from '../../components/CustomActivityIndicator.tsx';
 import FileUploader from '../../components/FileUploader.tsx';
-
-const getMimeType = (fileName: string) => {
-  const extension = fileName.split('.').pop() as string;
-  const mimeTypes: Record<string, string> = {
-    pdf: 'application/pdf',
-    png: 'image/png',
-    jpg: 'image/jpeg',
-    jpeg: 'image/jpeg',
-    doc: 'application/msword',
-    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    txt: 'text/plain',
-    rtf: 'application/rtf',
-  };
-  return mimeTypes[extension] || 'application/octet-stream';
-};
+import {getMimeType} from '../../utils/helpers.ts';
 
 const UpdateManagerScreen = ({route, navigation}: UpdateUserScreenProps) => {
   const {id, email, first_name, last_name, phone_number} = route.params;

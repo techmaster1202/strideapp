@@ -86,6 +86,37 @@ export interface CleanerDetailFormData {
   phoneNumber: string;
 }
 
+export interface PropertyDetailFormData {
+  id?: number;
+  office_id: number;
+  host_id: number | null;
+  name: string;
+  address_line_1: string;
+  address_line_2: string;
+  zip_code: string;
+  city: string;
+  state: string;
+  country: string;
+  beds: number;
+  baths: number;
+  accommodation_size: number;
+  price: string;
+  entrance_code: string;
+  supply_closet_location: string;
+  supply_closet_code: string;
+  check_in_time: string;
+  check_out_time: string;
+  ical_url: string;
+  notes: string;
+  pets_allowed: boolean;
+  laundry_needed: boolean;
+  washer_dryer_on_site: boolean;
+  start: string;
+  recurring: string;
+  square_feet: string;
+  price_paying_cleaning: string;
+  attachments: Record<string, any>[];
+}
 export interface UpdateProfileFormData {
   firstName: string;
   lastName: string;
@@ -125,6 +156,21 @@ export interface Cleaner {
   phone_number: string;
   car_count: number;
   property_number: number;
+}
+
+export interface Property {
+  id: number;
+  property_number: number;
+  name: string;
+  address: string;
+  city: string;
+  country: string;
+  host: {id: number; first_name: string; last_name: string};
+  office?: string;
+  primary_cleaner: string;
+  secondary_cleaner: string;
+  state: string;
+  zip_code: string;
 }
 
 export interface RoleOption {

@@ -81,7 +81,7 @@ const FileUploader = ({
       </TouchableOpacity>
       <FlatList
         data={[...uploadedFiles, ...existingFiles]}
-        keyExtractor={item => item.id}
+        keyExtractor={(item, index) => item?.id || index}
         renderItem={({item}) => renderFileItem(item)}
         style={styles.fileList}
       />

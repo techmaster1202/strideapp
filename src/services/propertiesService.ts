@@ -1,13 +1,13 @@
 import axiosInstance from '../utils/axiosInstance';
-import {APIResponse} from '../types';
+import {APIResponse, PropertyDetailFormData} from '../types';
 
-export const getManagerList = async (
+export const getPropertyList = async (
   keyword: string,
   page: number,
 ): Promise<APIResponse> => {
   try {
     console.log('keyword =========> ', keyword);
-    const response = await axiosInstance.get<APIResponse>('managers', {
+    const response = await axiosInstance.get<APIResponse>('properties', {
       params: {
         q: keyword,
         page: page,
@@ -19,18 +19,21 @@ export const getManagerList = async (
   }
 };
 
-export const getAllRoles = async (): Promise<APIResponse> => {
+export const getPropertyData = async (): Promise<APIResponse> => {
   try {
-    const response = await axiosInstance.get<APIResponse>('role_list');
+    const response = await axiosInstance.get<APIResponse>(
+      'properties/create/info',
+    );
     return response.data;
   } catch (error: any) {
+    console.log('error', error.response);
     throw error.response ? error.response.data : error.message;
   }
 };
 
-export const getManager = async (id: number): Promise<APIResponse> => {
+export const getProperty = async (id: number): Promise<APIResponse> => {
   try {
-    const response = await axiosInstance.get<APIResponse>(`managers/${id}`);
+    const response = await axiosInstance.get<APIResponse>(`properties/${id}`);
     return response.data;
   } catch (error: any) {
     console.log('error', error);
@@ -38,19 +41,11 @@ export const getManager = async (id: number): Promise<APIResponse> => {
   }
 };
 
-export const createManager = async (
-  firsName: string,
-  lastName: string,
-  email: string,
-  phoneNumber: string,
+export const createProperty = async (
+  data: PropertyDetailFormData,
 ): Promise<APIResponse> => {
   try {
-    const response = await axiosInstance.post<APIResponse>('managers', {
-      first_name: firsName,
-      last_name: lastName,
-      email: email,
-      phone_number: phoneNumber,
-    });
+    const response = await axiosInstance.post<APIResponse>('properties', data);
     return response.data;
   } catch (error: any) {
     console.log('error', error);
@@ -58,30 +53,26 @@ export const createManager = async (
   }
 };
 
-export const updateManager = async (
-  id: number,
-  firsName: string,
-  lastName: string,
-  email: string,
-  phoneNumber: string,
+export const updateProperty = async (
+  data: PropertyDetailFormData,
 ): Promise<APIResponse> => {
   try {
-    const response = await axiosInstance.put<APIResponse>(`managers/${id}`, {
-      first_name: firsName,
-      last_name: lastName,
-      email: email,
-      phone_number: phoneNumber,
-    });
+    const response = await axiosInstance.put<APIResponse>(
+      `properties/${data.id}`,
+      data,
+    );
     return response.data;
   } catch (error: any) {
-    console.log('error', error);
+    console.log('error', error.response);
     throw error.response ? error.response.data : error.message;
   }
 };
 
-export const deleteManager = async (id: number): Promise<APIResponse> => {
+export const deleteProperty = async (id: number): Promise<APIResponse> => {
   try {
-    const response = await axiosInstance.delete<APIResponse>(`managers/${id}`);
+    const response = await axiosInstance.delete<APIResponse>(
+      `properties/${id}`,
+    );
     return response.data;
   } catch (error: any) {
     console.log('error', error.response);
@@ -109,25 +100,11 @@ export const resetManagerPassword = async (
 export const deleteFile = async (fileId: string) => {
   try {
     const response = await axiosInstance.delete<APIResponse>(
-      `manager/${fileId}/delete_file`,
+      `property/${fileId}/delete_file`,
     );
     return response.data;
   } catch (error: any) {
     console.log('error', error);
-    throw error.response ? error.response.data : error.message;
-  }
-};
-
-export const uploadAttachmentFile = async (url: string, data: FormData) => {
-  try {
-    const response = await axiosInstance.post(url, data, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
-  } catch (error: any) {
-    console.log('error', error.response.data);
     throw error.response ? error.response.data : error.message;
   }
 };
