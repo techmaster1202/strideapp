@@ -6,7 +6,6 @@ import {createGlobalStyles} from '../utils/styles.ts';
 import {Props} from '../types/index.ts';
 import * as AppConstants from '../constants/constants.ts';
 import PageHeader from '../components/PageHeader.tsx';
-
 const CalendarScreen = ({navigation}: Props) => {
   const theme = useTheme();
   const globalStyles = createGlobalStyles(theme);

@@ -9,11 +9,11 @@ const Stack = createNativeStackNavigator();
 export default function EmployeesStack() {
   return (
     <Stack.Navigator
-      initialRouteName="Managers"
+      initialRouteName="/"
       screenOptions={{
         headerShown: false,
       }}>
-      <Stack.Screen name="Employees" component={EmployeesScreen} />
+      <Stack.Screen name="/" component={EmployeesScreen} />
       <Stack.Screen name="AddManager" component={AddEmployeeScreen} />
       <Stack.Screen name="UpdateManager" component={UpdateEmployeeScreen} />
     </Stack.Navigator>

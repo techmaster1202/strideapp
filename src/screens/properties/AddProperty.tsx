@@ -154,7 +154,7 @@ const AddPropertyScreen = ({navigation}: UpdateUserScreenProps) => {
     <SafeAreaView style={{flex: 1}}>
       <DetailPageHeader
         navigation={navigation}
-        title={AppConstants.TITLE_UpdateProperty}
+        title={AppConstants.TITLE_AddProperty}
       />
       <ScrollView nestedScrollEnabled={true}>
         <View style={[globalStyles.container]}>

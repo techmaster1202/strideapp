@@ -158,6 +158,22 @@ export interface Cleaner {
   property_number: number;
 }
 
+export interface Host {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number: string;
+  cars_count?: number;
+  properties_count?: number;
+}
+
+export interface Role {
+  id: number;
+  name: string;
+  users_count: number;
+}
+
 export interface Property {
   id: number;
   property_number: number;

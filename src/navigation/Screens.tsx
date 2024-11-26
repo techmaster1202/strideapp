@@ -1,13 +1,13 @@
 import ProfileScreen from '../screens/ProfileScreen';
 import CalendarScreen from '../screens/CalendarScreen';
-import ClientScreen from '../screens/ClientScreen';
 import CarScreen from '../screens/CarScreen';
 import UsersStack from './UsersStack';
 import ManagersStack from './ManagersStack';
 import NotificationScreen from '../screens/NotificationScreen';
-import RoleScreen from '../screens/RoleScreen';
 import EmployeesStack from './EmployeesStack';
 import PropertiesStack from './PropertiesStack';
+import HostsStack from './HostsStack';
+import RolesStack from './RolesStack';
 
 const Screens = [
   {
@@ -22,7 +22,7 @@ const Screens = [
   },
   {
     name: 'Clients',
-    component: ClientScreen,
+    component: HostsStack,
     icon: 'account-group',
   },
   {
@@ -57,7 +57,7 @@ const Screens = [
   },
   {
     name: 'Roles',
-    component: RoleScreen,
+    component: RolesStack,
     icon: 'account-cog',
   },
 ];
