@@ -71,6 +71,21 @@ export interface UserDetailFormData {
   password: string;
   role: string;
 }
+export interface CarDetailFormData {
+  host_id: number | null;
+  selective_assign: number | null;
+  name: string;
+  license_plate: string;
+  color: string;
+  turo_id: string;
+  notes: string;
+}
+export interface ManagerDetailFormData {
+  firstName: string;
+  lastName: string;
+  emailAddress: string;
+  phoneNumber: string;
+}
 
 export interface CleanerDetailFormData {
   id: number;
@@ -80,6 +95,37 @@ export interface CleanerDetailFormData {
   phoneNumber: string;
 }
 
+export interface PropertyDetailFormData {
+  id?: number;
+  office_id: number;
+  host_id: number | null;
+  name: string;
+  address_line_1: string;
+  address_line_2: string;
+  zip_code: string;
+  city: string;
+  state: string;
+  country: string;
+  beds: number;
+  baths: number;
+  accommodation_size: number;
+  price: string;
+  entrance_code: string;
+  supply_closet_location: string;
+  supply_closet_code: string;
+  check_in_time: string;
+  check_out_time: string;
+  ical_url: string;
+  notes: string;
+  pets_allowed: boolean;
+  laundry_needed: boolean;
+  washer_dryer_on_site: boolean;
+  start: string;
+  recurring: string;
+  square_feet: string;
+  price_paying_cleaning: string;
+  attachments: Record<string, any>[];
+}
 export interface UpdateProfileFormData {
   firstName: string;
   lastName: string;
@@ -118,6 +164,54 @@ export interface Cleaner {
   email: string;
   phone_number: string;
   car_count: number;
+  property_number: number;
+}
+
+export interface Host {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number: string;
+  cars_count?: number;
+  properties_count?: number;
+}
+
+export interface Car {
+  id: number;
+  host_id: number;
+  name: string;
+  notes: string;
+  host: Host;
+  selective_assign: string;
+  license_plate: string;
+  turo_id: number;
+  color: string;
+  cleaner?: {
+    id: number;
+    cleaner_first_name: string;
+    cleaner_last_name: string;
+  };
+}
+export interface Role {
+  id: number;
+  name: string;
+  users_count: number;
+}
+
+export interface Property {
+  id: number;
+  property_number: number;
+  name: string;
+  address: string;
+  city: string;
+  country: string;
+  host: {id: number; first_name: string; last_name: string};
+  office?: string;
+  primary_cleaner: string;
+  secondary_cleaner: string;
+  state: string;
+  zip_code: string;
 }
 
 export interface RoleOption {

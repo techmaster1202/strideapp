@@ -1,13 +1,13 @@
 import ProfileScreen from '../screens/ProfileScreen';
 import CalendarScreen from '../screens/CalendarScreen';
-import ClientScreen from '../screens/ClientScreen';
-import PropertyScreen from '../screens/PropertyScreen';
-import CarScreen from '../screens/CarScreen';
-import ManagerScreen from '../screens/ManagerScreen';
 import UsersStack from './UsersStack';
 import ManagersStack from './ManagersStack';
 import NotificationScreen from '../screens/NotificationScreen';
-import RoleScreen from '../screens/RoleScreen';
+import EmployeesStack from './EmployeesStack';
+import PropertiesStack from './PropertiesStack';
+import HostsStack from './HostsStack';
+import RolesStack from './RolesStack';
+import CarsStack from './CarsStack';
 
 const Screens = [
   {
@@ -22,17 +22,17 @@ const Screens = [
   },
   {
     name: 'Clients',
-    component: ClientScreen,
+    component: HostsStack,
     icon: 'account-group',
   },
   {
     name: 'Properties',
-    component: PropertyScreen,
+    component: PropertiesStack,
     icon: 'home-city',
   },
   {
     name: 'Cars',
-    component: CarScreen,
+    component: CarsStack,
     icon: 'car',
   },
   {
@@ -42,7 +42,7 @@ const Screens = [
   },
   {
     name: 'Employees',
-    component: ManagersStack,
+    component: EmployeesStack,
     icon: 'account-tie',
   },
   {
@@ -57,7 +57,7 @@ const Screens = [
   },
   {
     name: 'Roles',
-    component: RoleScreen,
+    component: RolesStack,
     icon: 'account-cog',
   },
 ];

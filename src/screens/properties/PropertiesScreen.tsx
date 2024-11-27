@@ -9,13 +9,8 @@ import {
   IconButton,
 } from 'react-native-paper';
 import {createGlobalStyles} from '../../utils/styles.ts';
-import {Props, Cleaner} from '../../types/index.ts';
+import {Props, Property} from '../../types/index.ts';
 import * as AppConstants from '../../constants/constants.ts';
-import {
-  deleteManager,
-  getManagerList,
-  resetManagerPassword,
-} from '../../services/managersService.ts';
 import CustomActivityIndicator from '../../components/CustomActivityIndicator.tsx';
 import Modal from 'react-native-modal';
 import PageTitle from '../../components/PageTitle.tsx';
@@ -24,42 +19,31 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import PageHeader from '../../components/PageHeader.tsx';
 import {useFocusEffect} from '@react-navigation/native';
 import ConfirmModal from '../../components/ConfirmModal.tsx';
-import EmployeeCard from '../../components/EmployeeCard.tsx';
+import {
+  deleteProperty,
+  getPropertyList,
+} from '../../services/propertiesService.ts';
+import PropertyCard from '../../components/PropertyCard.tsx';
 
-const ManagersScreen = ({navigation}: Props) => {
+const PropertiesScreen = ({navigation}: Props) => {
   const theme = useTheme();
   const globalStyles = createGlobalStyles(theme);
 
   const [keyword, setKeyword] = useState('');
-  const [users, setUsers] = useState<Cleaner[]>([]);
+  const [properties, setProperties] = useState<Property[]>([]);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [visible, setVisible] = useState(false);
-  const [resetPwdVisible, setResetPwdVisible] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [selectedPropertyId, setSelectedPropertyId] = useState(null);
 
-  const loadUsers = useCallback(async () => {
+  const loadProperties = useCallback(async () => {
     setLoading(true);
-    await getManagerList(keyword, page)
+    await getPropertyList(keyword, page)
       .then(response => {
         if (response.success) {
-          const newUsers = response.data.users;
-          if (newUsers.length > 0) {
-            setUsers(prevUsers => {
-              const uniqueUsers = [
-                ...prevUsers,
-                ...newUsers.filter(
-                  (newUser: Cleaner) =>
-                    !prevUsers.some(prevUser => prevUser.id === newUser.id),
-                ),
-              ];
-              return uniqueUsers;
-            });
-            setPage(prevPage => prevPage + 1);
-          } else {
-            setHasMore(false);
-          }
+          const newProperties = response.data.properties;
+          setProperties(newProperties ?? []);
         }
       })
       .catch(error => {
@@ -67,39 +51,33 @@ const ManagersScreen = ({navigation}: Props) => {
       })
       .finally(() => {
         setLoading(false);
+        setHasMore(false);
       });
   }, [keyword, page]);
 
   const handleChangeSearch = (val: string) => {
     setKeyword(val);
     setPage(1);
-    setUsers([]);
+    setProperties([]);
     setHasMore(true);
-    loadUsers();
+    loadProperties();
   };
 
   const showModal = () => setVisible(true);
-  const showResetPwdModal = () => setResetPwdVisible(true);
   const hideModal = () => setVisible(false);
-  const hideResetPwdModal = () => setResetPwdVisible(false);
 
   const handleClickDelete = (id: any) => {
-    setSelectedUserId(id);
+    setSelectedPropertyId(id);
     showModal();
   };
 
-  const handleClickResetPwd = (id: any) => {
-    setSelectedUserId(id);
-    showResetPwdModal();
-  };
-
-  const deleteUser = async () => {
-    if (selectedUserId) {
+  const onDeleteProperty = async () => {
+    if (selectedPropertyId) {
       setLoading(true);
-      await deleteManager(selectedUserId)
+      await deleteProperty(selectedPropertyId)
         .then(response => {
           if (response.success) {
-            setSelectedUserId(null);
+            setSelectedPropertyId(null);
             hideModal();
             handleChangeSearch('');
           }
@@ -120,43 +98,17 @@ const ManagersScreen = ({navigation}: Props) => {
     }
   };
 
-  const resetPassword = async () => {
-    if (selectedUserId) {
-      setLoading(true);
-      await resetManagerPassword(selectedUserId)
-        .then(response => {
-          setSelectedUserId(null);
-          hideResetPwdModal();
-          Toast.show({
-            type: response.success ? 'success' : 'error',
-            text1: response.message,
-          });
-          setLoading(false);
-          return;
-        })
-        .catch(error => {
-          setSelectedUserId(null);
-          hideResetPwdModal();
-          Toast.show({
-            type: 'error',
-            text1: error.message || 'Something went wrong, please try again.',
-          });
-          setLoading(false);
-        });
-    }
-  };
-
   useEffect(() => {
-    loadUsers();
-  }, [loadUsers]);
+    loadProperties();
+  }, [loadProperties]);
 
   useFocusEffect(
     React.useCallback(() => {
       setKeyword('');
       setPage(1);
-      setUsers([]);
+      setProperties([]);
       setHasMore(true);
-      loadUsers();
+      loadProperties();
     }, []),
   );
 
@@ -168,12 +120,15 @@ const ManagersScreen = ({navigation}: Props) => {
           padding: 0,
         },
       ]}>
-      <PageHeader navigation={navigation} title={AppConstants.TITLE_Managers} />
+      <PageHeader
+        navigation={navigation}
+        title={AppConstants.TITLE_Properties}
+      />
       <View style={styles.headerButtonRow}>
         <Button
           mode="contained"
           style={globalStyles.defaultModalButton}
-          onPress={() => navigation.navigate('AddManager')}>
+          onPress={() => navigation.navigate('AddProperty')}>
           {AppConstants.TITLE_AddNew}
         </Button>
       </View>
@@ -189,14 +144,13 @@ const ManagersScreen = ({navigation}: Props) => {
       </View>
       <Divider />
       <FlatList
-        data={users}
+        data={properties}
         keyExtractor={item => item.id.toString()}
         renderItem={({item}) => (
-          <EmployeeCard
+          <PropertyCard
             key={item.id}
-            item={item}
+            property={item}
             handleClickDelete={handleClickDelete}
-            handleClickResetPwd={handleClickResetPwd}
             navigation={navigation}
           />
         )}
@@ -211,7 +165,7 @@ const ManagersScreen = ({navigation}: Props) => {
           icon="refresh"
           mode="contained"
           size={30}
-          onPress={loadUsers}
+          onPress={loadProperties}
           style={{
             position: 'absolute',
             backgroundColor: theme.colors.onPrimary,
@@ -232,7 +186,7 @@ const ManagersScreen = ({navigation}: Props) => {
             <Button
               mode="contained"
               style={globalStyles.dangerModalButton}
-              onPress={deleteUser}>
+              onPress={onDeleteProperty}>
               {AppConstants.TITLE_DeleteRecord}
             </Button>
             <Button
@@ -253,20 +207,8 @@ const ManagersScreen = ({navigation}: Props) => {
         confirmString={AppConstants.TITLE_DeleteRecord}
         cancelString={AppConstants.TITLE_Cancel}
         loading={loading}
-        onConfirm={deleteUser}
+        onConfirm={onDeleteProperty}
         onCancel={hideModal}
-        confirmStyle="warning"
-      />
-
-      <ConfirmModal
-        visible={resetPwdVisible}
-        title="Reset Password"
-        contents="Are you sure you want to reset this user's password? This action cannot be undone."
-        confirmString={AppConstants.TITLE_DeleteRecord}
-        cancelString={AppConstants.TITLE_Cancel}
-        loading={loading}
-        onConfirm={resetPassword}
-        onCancel={hideResetPwdModal}
         confirmStyle="warning"
       />
       <CustomActivityIndicator loading={loading} />
@@ -274,7 +216,7 @@ const ManagersScreen = ({navigation}: Props) => {
   );
 };
 
-export default ManagersScreen;
+export default PropertiesScreen;
 
 const styles = StyleSheet.create({
   headerButtonRow: {

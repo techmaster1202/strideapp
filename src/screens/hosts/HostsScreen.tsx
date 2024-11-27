@@ -9,13 +9,8 @@ import {
   IconButton,
 } from 'react-native-paper';
 import {createGlobalStyles} from '../../utils/styles.ts';
-import {Props, Cleaner} from '../../types/index.ts';
+import {Props, Host} from '../../types/index.ts';
 import * as AppConstants from '../../constants/constants.ts';
-import {
-  deleteManager,
-  getManagerList,
-  resetManagerPassword,
-} from '../../services/managersService.ts';
 import CustomActivityIndicator from '../../components/CustomActivityIndicator.tsx';
 import Modal from 'react-native-modal';
 import PageTitle from '../../components/PageTitle.tsx';
@@ -24,42 +19,28 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import PageHeader from '../../components/PageHeader.tsx';
 import {useFocusEffect} from '@react-navigation/native';
 import ConfirmModal from '../../components/ConfirmModal.tsx';
-import EmployeeCard from '../../components/EmployeeCard.tsx';
+import {deleteHost, getHostList} from '../../services/hostsService.ts';
+import HostCard from '../../components/HostCard.tsx';
 
-const ManagersScreen = ({navigation}: Props) => {
+const HostsScreen = ({navigation}: Props) => {
   const theme = useTheme();
   const globalStyles = createGlobalStyles(theme);
 
   const [keyword, setKeyword] = useState('');
-  const [users, setUsers] = useState<Cleaner[]>([]);
+  const [hosts, setHosts] = useState<Host[]>([]);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [visible, setVisible] = useState(false);
-  const [resetPwdVisible, setResetPwdVisible] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [selectedHostId, setSelectedHostId] = useState(null);
 
-  const loadUsers = useCallback(async () => {
+  const loadHosts = useCallback(async () => {
     setLoading(true);
-    await getManagerList(keyword, page)
+    await getHostList(keyword, page)
       .then(response => {
         if (response.success) {
-          const newUsers = response.data.users;
-          if (newUsers.length > 0) {
-            setUsers(prevUsers => {
-              const uniqueUsers = [
-                ...prevUsers,
-                ...newUsers.filter(
-                  (newUser: Cleaner) =>
-                    !prevUsers.some(prevUser => prevUser.id === newUser.id),
-                ),
-              ];
-              return uniqueUsers;
-            });
-            setPage(prevPage => prevPage + 1);
-          } else {
-            setHasMore(false);
-          }
+          setHosts(response.data.hosts);
+          setHasMore(false);
         }
       })
       .catch(error => {
@@ -73,33 +54,26 @@ const ManagersScreen = ({navigation}: Props) => {
   const handleChangeSearch = (val: string) => {
     setKeyword(val);
     setPage(1);
-    setUsers([]);
+    setHosts([]);
     setHasMore(true);
-    loadUsers();
+    loadHosts();
   };
 
   const showModal = () => setVisible(true);
-  const showResetPwdModal = () => setResetPwdVisible(true);
   const hideModal = () => setVisible(false);
-  const hideResetPwdModal = () => setResetPwdVisible(false);
 
   const handleClickDelete = (id: any) => {
-    setSelectedUserId(id);
+    setSelectedHostId(id);
     showModal();
   };
 
-  const handleClickResetPwd = (id: any) => {
-    setSelectedUserId(id);
-    showResetPwdModal();
-  };
-
   const deleteUser = async () => {
-    if (selectedUserId) {
+    if (selectedHostId) {
       setLoading(true);
-      await deleteManager(selectedUserId)
+      await deleteHost(selectedHostId)
         .then(response => {
           if (response.success) {
-            setSelectedUserId(null);
+            setSelectedHostId(null);
             hideModal();
             handleChangeSearch('');
           }
@@ -120,43 +94,17 @@ const ManagersScreen = ({navigation}: Props) => {
     }
   };
 
-  const resetPassword = async () => {
-    if (selectedUserId) {
-      setLoading(true);
-      await resetManagerPassword(selectedUserId)
-        .then(response => {
-          setSelectedUserId(null);
-          hideResetPwdModal();
-          Toast.show({
-            type: response.success ? 'success' : 'error',
-            text1: response.message,
-          });
-          setLoading(false);
-          return;
-        })
-        .catch(error => {
-          setSelectedUserId(null);
-          hideResetPwdModal();
-          Toast.show({
-            type: 'error',
-            text1: error.message || 'Something went wrong, please try again.',
-          });
-          setLoading(false);
-        });
-    }
-  };
-
   useEffect(() => {
-    loadUsers();
-  }, [loadUsers]);
+    loadHosts();
+  }, [loadHosts]);
 
   useFocusEffect(
     React.useCallback(() => {
       setKeyword('');
       setPage(1);
-      setUsers([]);
+      setHosts([]);
       setHasMore(true);
-      loadUsers();
+      loadHosts();
     }, []),
   );
 
@@ -168,13 +116,19 @@ const ManagersScreen = ({navigation}: Props) => {
           padding: 0,
         },
       ]}>
-      <PageHeader navigation={navigation} title={AppConstants.TITLE_Managers} />
-      <View style={styles.headerButtonRow}>
+      <PageHeader navigation={navigation} title={AppConstants.TITLE_HOSTS} />
+      <View style={[styles.headerButtonRow, {gap: 10}]}>
         <Button
           mode="contained"
-          style={globalStyles.defaultModalButton}
-          onPress={() => navigation.navigate('AddManager')}>
-          {AppConstants.TITLE_AddNew}
+          style={[globalStyles.defaultModalButton, {width: 'auto'}]}
+          onPress={() => navigation.navigate('AddHost')}>
+          {AppConstants.TITLE_AddClient}
+        </Button>
+        <Button
+          mode="contained"
+          style={[globalStyles.defaultModalButton, {width: 'auto'}]}
+          onPress={() => navigation.navigate('AddProperty')}>
+          {AppConstants.TITLE_AddProperty}
         </Button>
       </View>
       <View style={styles.searchBar}>
@@ -189,14 +143,13 @@ const ManagersScreen = ({navigation}: Props) => {
       </View>
       <Divider />
       <FlatList
-        data={users}
+        data={hosts}
         keyExtractor={item => item.id.toString()}
         renderItem={({item}) => (
-          <EmployeeCard
+          <HostCard
             key={item.id}
             item={item}
             handleClickDelete={handleClickDelete}
-            handleClickResetPwd={handleClickResetPwd}
             navigation={navigation}
           />
         )}
@@ -211,7 +164,7 @@ const ManagersScreen = ({navigation}: Props) => {
           icon="refresh"
           mode="contained"
           size={30}
-          onPress={loadUsers}
+          onPress={loadHosts}
           style={{
             position: 'absolute',
             backgroundColor: theme.colors.onPrimary,
@@ -258,23 +211,12 @@ const ManagersScreen = ({navigation}: Props) => {
         confirmStyle="warning"
       />
 
-      <ConfirmModal
-        visible={resetPwdVisible}
-        title="Reset Password"
-        contents="Are you sure you want to reset this user's password? This action cannot be undone."
-        confirmString={AppConstants.TITLE_DeleteRecord}
-        cancelString={AppConstants.TITLE_Cancel}
-        loading={loading}
-        onConfirm={resetPassword}
-        onCancel={hideResetPwdModal}
-        confirmStyle="warning"
-      />
       <CustomActivityIndicator loading={loading} />
     </SafeAreaView>
   );
 };
 
-export default ManagersScreen;
+export default HostsScreen;
 
 const styles = StyleSheet.create({
   headerButtonRow: {
@@ -288,17 +230,6 @@ const styles = StyleSheet.create({
   searchBar: {
     width: '100%',
     paddingHorizontal: 20,
-  },
-  cardHeader: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingBottom: 5,
-  },
-  cardHeaderAction: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
   },
   contentsRow: {
     flexDirection: 'row',

@@ -1,50 +1,48 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {View} from 'react-native';
 import {Button, Text, TextInput, useTheme} from 'react-native-paper';
-import {Dropdown} from 'react-native-paper-dropdown';
 import {createGlobalStyles} from '../../utils/styles.ts';
-import {Props, RoleOption, UserDetailFormData} from '../../types/index.ts';
+import {ManagerDetailFormData, Props} from '../../types/index.ts';
 import * as AppConstants from '../../constants/constants.ts';
 import DetailPageHeader from '../../components/DetailPageHeader.tsx';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {Controller, useForm} from 'react-hook-form';
 import {useValidation} from '../../hooks/useValidation.ts';
-import {getAllRoles, createUser} from '../../services/usersService.ts';
 import Toast from 'react-native-toast-message';
 import CustomActivityIndicator from '../../components/CustomActivityIndicator.tsx';
+import {createManager} from '../../services/managersService.ts';
 
 const AddManagerScreen = ({navigation}: Props) => {
   const theme = useTheme();
   const globalStyles = createGlobalStyles(theme);
   const {validateEmail} = useValidation();
-  const [roles, setRoles] = useState<RoleOption[]>([]);
   const [loading, setLoading] = useState(false);
 
   const {
     control,
     handleSubmit,
     formState: {errors},
-    watch,
     setValue,
-  } = useForm<UserDetailFormData>();
+  } = useForm<ManagerDetailFormData>();
 
-  const onSubmit = async (data: UserDetailFormData) => {
-    if (loading) return;
+  const onSubmit = async (data: ManagerDetailFormData) => {
+    if (loading) {
+      return;
+    }
 
     setLoading(true);
-    await createUser(
+    await createManager(
       data.firstName,
       data.lastName,
       data.emailAddress,
-      data.role,
+      data.phoneNumber,
     )
       .then(response => {
         if (response.success) {
           setValue('firstName', '');
           setValue('lastName', '');
           setValue('emailAddress', '');
-          setValue('role', '');
-          setValue('password', '');
+          setValue('phoneNumber', '');
         }
         Toast.show({
           type: response.success ? 'success' : 'error',
@@ -58,60 +56,20 @@ const AddManagerScreen = ({navigation}: Props) => {
           type: 'error',
           text1: error.message || 'Something went wrong, please try again.',
         });
+      })
+      .finally(() => {
         setLoading(false);
       });
   };
-
-  const loadRoles = async () => {
-    await getAllRoles()
-      .then(response => {
-        if (response.success) {
-          setRoles(response.data.roles);
-        }
-      })
-      .catch(error => {
-        console.error('Failed to fetch users:', error);
-      });
-  };
-
-  useEffect(() => {
-    loadRoles();
-  }, []);
 
   return (
     <SafeAreaView style={{flex: 1}}>
       <DetailPageHeader
         navigation={navigation}
-        title={AppConstants.TITLE_AddUser}
+        title={AppConstants.TITLE_AddManager}
       />
       <View style={[globalStyles.container]}>
         <View style={{width: '100%', marginBottom: 20}}>
-          <Controller
-            control={control}
-            rules={{
-              required: {
-                message: AppConstants.ERROR_RoleIsRequired,
-                value: true,
-              },
-            }}
-            render={({field: {onChange, onBlur, value}}) => (
-              <Dropdown
-                mode="outlined"
-                label={AppConstants.LABEL_Role}
-                placeholder={AppConstants.LABEL_Role}
-                options={roles}
-                value={value}
-                onSelect={onChange}
-              />
-            )}
-            name="role"
-          />
-          <View style={globalStyles.errorField}>
-            {errors.role?.message && (
-              <Text style={globalStyles.errorText}>{errors.role?.message}</Text>
-            )}
-          </View>
-
           <Controller
             control={control}
             rules={{
@@ -217,6 +175,42 @@ const AddManagerScreen = ({navigation}: Props) => {
               errors.emailAddress.type === 'invalidEmail' && (
                 <Text style={globalStyles.errorText}>
                   {AppConstants.ERROR_InvalidEmail}
+                </Text>
+              )}
+          </View>
+
+          <Controller
+            control={control}
+            rules={{
+              required: {
+                message: AppConstants.ERROR_PhoneNumberIsRequired,
+                value: true,
+              },
+            }}
+            render={({field: {onChange, onBlur, value}}) => (
+              <TextInput
+                label={AppConstants.LABEL_MobilePhone}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                mode="outlined"
+                placeholder={AppConstants.PLACEHOLDER_Phone}
+                textContentType="none"
+                style={globalStyles.textInput}
+              />
+            )}
+            name="phoneNumber"
+          />
+          <View style={globalStyles.errorField}>
+            {errors.phoneNumber && errors.phoneNumber.type === 'required' && (
+              <Text style={globalStyles.errorText}>
+                {AppConstants.ERROR_PhoneNumberIsRequired}
+              </Text>
+            )}
+            {errors.phoneNumber &&
+              errors.phoneNumber.type === 'invalidPhone' && (
+                <Text style={globalStyles.errorText}>
+                  {AppConstants.ERROR_InvalidPhone}
                 </Text>
               )}
           </View>

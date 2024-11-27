@@ -11,11 +11,6 @@ import {
 import {createGlobalStyles} from '../../utils/styles.ts';
 import {Props, Cleaner} from '../../types/index.ts';
 import * as AppConstants from '../../constants/constants.ts';
-import {
-  deleteManager,
-  getManagerList,
-  resetManagerPassword,
-} from '../../services/managersService.ts';
 import CustomActivityIndicator from '../../components/CustomActivityIndicator.tsx';
 import Modal from 'react-native-modal';
 import PageTitle from '../../components/PageTitle.tsx';
@@ -24,9 +19,14 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import PageHeader from '../../components/PageHeader.tsx';
 import {useFocusEffect} from '@react-navigation/native';
 import ConfirmModal from '../../components/ConfirmModal.tsx';
+import {
+  deleteCleaner,
+  getCleanerList,
+  resetCleanerPassword,
+} from '../../services/cleanersService.ts';
 import EmployeeCard from '../../components/EmployeeCard.tsx';
 
-const ManagersScreen = ({navigation}: Props) => {
+const EmployeesScreen = ({navigation}: Props) => {
   const theme = useTheme();
   const globalStyles = createGlobalStyles(theme);
 
@@ -41,7 +41,7 @@ const ManagersScreen = ({navigation}: Props) => {
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
-    await getManagerList(keyword, page)
+    await getCleanerList(keyword, page)
       .then(response => {
         if (response.success) {
           const newUsers = response.data.users;
@@ -96,7 +96,7 @@ const ManagersScreen = ({navigation}: Props) => {
   const deleteUser = async () => {
     if (selectedUserId) {
       setLoading(true);
-      await deleteManager(selectedUserId)
+      await deleteCleaner(selectedUserId)
         .then(response => {
           if (response.success) {
             setSelectedUserId(null);
@@ -123,7 +123,7 @@ const ManagersScreen = ({navigation}: Props) => {
   const resetPassword = async () => {
     if (selectedUserId) {
       setLoading(true);
-      await resetManagerPassword(selectedUserId)
+      await resetCleanerPassword(selectedUserId)
         .then(response => {
           setSelectedUserId(null);
           hideResetPwdModal();
@@ -168,7 +168,10 @@ const ManagersScreen = ({navigation}: Props) => {
           padding: 0,
         },
       ]}>
-      <PageHeader navigation={navigation} title={AppConstants.TITLE_Managers} />
+      <PageHeader
+        navigation={navigation}
+        title={AppConstants.TITLE_Employees}
+      />
       <View style={styles.headerButtonRow}>
         <Button
           mode="contained"
@@ -198,6 +201,7 @@ const ManagersScreen = ({navigation}: Props) => {
             handleClickDelete={handleClickDelete}
             handleClickResetPwd={handleClickResetPwd}
             navigation={navigation}
+            isCleaner={true}
           />
         )}
         style={{
@@ -274,7 +278,7 @@ const ManagersScreen = ({navigation}: Props) => {
   );
 };
 
-export default ManagersScreen;
+export default EmployeesScreen;
 
 const styles = StyleSheet.create({
   headerButtonRow: {
@@ -288,17 +292,6 @@ const styles = StyleSheet.create({
   searchBar: {
     width: '100%',
     paddingHorizontal: 20,
-  },
-  cardHeader: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingBottom: 5,
-  },
-  cardHeaderAction: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
   },
   contentsRow: {
     flexDirection: 'row',

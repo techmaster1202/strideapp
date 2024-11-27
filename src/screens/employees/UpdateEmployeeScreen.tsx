@@ -1,8 +1,7 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import {View} from 'react-native';
+import {View, SafeAreaView} from 'react-native';
 import {Button, Text, TextInput, useTheme} from 'react-native-paper';
 import Toast from 'react-native-toast-message';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import {Controller, useForm} from 'react-hook-form';
 import {createGlobalStyles} from '../../utils/styles.ts';
 import {
@@ -15,14 +14,14 @@ import {useValidation} from '../../hooks/useValidation.ts';
 import {
   deleteFile,
   getManager,
-  updateManager,
   uploadAttachmentFile,
 } from '../../services/managersService.ts';
 import CustomActivityIndicator from '../../components/CustomActivityIndicator.tsx';
 import FileUploader from '../../components/FileUploader.tsx';
+import {getCleaner, updateCleaner} from '../../services/cleanersService.ts';
 import {getMimeType} from '../../utils/helpers.ts';
 
-const UpdateManagerScreen = ({route, navigation}: UpdateUserScreenProps) => {
+const UpdateEmployeeScreen = ({route, navigation}: UpdateUserScreenProps) => {
   const {id, email, first_name, last_name, phone_number} = route.params;
 
   const theme = useTheme();
@@ -46,7 +45,7 @@ const UpdateManagerScreen = ({route, navigation}: UpdateUserScreenProps) => {
     }
 
     setLoading(true);
-    await updateManager(
+    await updateCleaner(
       data.id,
       data.firstName,
       data.lastName,
@@ -75,7 +74,7 @@ const UpdateManagerScreen = ({route, navigation}: UpdateUserScreenProps) => {
   const onDeleteFile = async (fileId: string) => {
     try {
       await deleteFile(fileId);
-      await getManager(id).then(res => {
+      await getCleaner(id).then(res => {
         setAgreements(res.data?.cleaner?.agreements);
         setInsurances(res.data?.cleaner?.insurances);
         setOthers(res.data?.cleaner?.others);
@@ -108,18 +107,18 @@ const UpdateManagerScreen = ({route, navigation}: UpdateUserScreenProps) => {
       let res: any = null;
       switch (file_name) {
         case 'pond_agreement':
-          url = `/manager/${id}/upload_agreement`;
+          url = `/cleaner/${id}/upload_agreement`;
           res = await uploadAttachmentFile(url, formData);
           setAgreements(p => [...p, res]);
           console.log(res);
           break;
         case 'pond_insurance':
-          url = `/manager/${id}/upload_insurance`;
+          url = `/cleaner/${id}/upload_insurance`;
           res = await uploadAttachmentFile(url, formData);
           setInsurances(p => [...p, res]);
           break;
         case 'pond_other':
-          url = `/manager/${id}/upload_other`;
+          url = `/cleaner/${id}/upload_other`;
           res = await uploadAttachmentFile(url, formData);
           setOthers(p => [...p, res]);
           break;
@@ -157,7 +156,7 @@ const UpdateManagerScreen = ({route, navigation}: UpdateUserScreenProps) => {
     <SafeAreaView style={{flex: 1}}>
       <DetailPageHeader
         navigation={navigation}
-        title={AppConstants.TITLE_UpdateManager}
+        title={AppConstants.TITLE_UpdateEmployee}
       />
 
       <View style={[globalStyles.container]}>
@@ -334,4 +333,4 @@ const UpdateManagerScreen = ({route, navigation}: UpdateUserScreenProps) => {
   );
 };
 
-export default UpdateManagerScreen;
+export default UpdateEmployeeScreen;
