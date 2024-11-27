@@ -71,6 +71,15 @@ export interface UserDetailFormData {
   password: string;
   role: string;
 }
+export interface CarDetailFormData {
+  host_id: number | null;
+  selective_assign: number | null;
+  name: string;
+  license_plate: string;
+  color: string;
+  turo_id: string;
+  notes: string;
+}
 export interface ManagerDetailFormData {
   firstName: string;
   lastName: string;
@@ -168,6 +177,22 @@ export interface Host {
   properties_count?: number;
 }
 
+export interface Car {
+  id: number;
+  host_id: number;
+  name: string;
+  notes: string;
+  host: Host;
+  selective_assign: string;
+  license_plate: string;
+  turo_id: number;
+  color: string;
+  cleaner?: {
+    id: number;
+    cleaner_first_name: string;
+    cleaner_last_name: string;
+  };
+}
 export interface Role {
   id: number;
   name: string;

@@ -1,6 +1,5 @@
 import ProfileScreen from '../screens/ProfileScreen';
 import CalendarScreen from '../screens/CalendarScreen';
-import CarScreen from '../screens/CarScreen';
 import UsersStack from './UsersStack';
 import ManagersStack from './ManagersStack';
 import NotificationScreen from '../screens/NotificationScreen';
@@ -8,6 +7,7 @@ import EmployeesStack from './EmployeesStack';
 import PropertiesStack from './PropertiesStack';
 import HostsStack from './HostsStack';
 import RolesStack from './RolesStack';
+import CarsStack from './CarsStack';
 
 const Screens = [
   {
@@ -32,7 +32,7 @@ const Screens = [
   },
   {
     name: 'Cars',
-    component: CarScreen,
+    component: CarsStack,
     icon: 'car',
   },
   {
