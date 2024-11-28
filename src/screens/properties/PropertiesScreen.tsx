@@ -100,7 +100,7 @@ const PropertiesScreen = ({navigation}: Props) => {
 
   useEffect(() => {
     loadProperties();
-  }, [loadProperties]);
+  }, []);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -202,7 +202,7 @@ const PropertiesScreen = ({navigation}: Props) => {
 
       <ConfirmModal
         visible={visible}
-        title="Delete User"
+        title="Delete Record"
         contents="Are you sure want to delete this record?"
         confirmString={AppConstants.TITLE_DeleteRecord}
         cancelString={AppConstants.TITLE_Cancel}

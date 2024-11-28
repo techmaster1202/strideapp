@@ -1,4 +1,4 @@
-import {StyleSheet, View, FlatList} from 'react-native';
+import {StyleSheet, View, FlatList, ScrollView} from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {
   Button,
@@ -9,7 +9,7 @@ import {
   IconButton,
 } from 'react-native-paper';
 import {createGlobalStyles} from '../../utils/styles.ts';
-import {Props, Cleaner} from '../../types/index.ts';
+import {Props, Cleaner, Property} from '../../types/index.ts';
 import * as AppConstants from '../../constants/constants.ts';
 import CustomActivityIndicator from '../../components/CustomActivityIndicator.tsx';
 import Modal from 'react-native-modal';
@@ -25,6 +25,7 @@ import {
   resetCleanerPassword,
 } from '../../services/cleanersService.ts';
 import EmployeeCard from '../../components/EmployeeCard.tsx';
+import {getHostProperty} from '../../services/hostsService.ts';
 
 const EmployeesScreen = ({navigation}: Props) => {
   const theme = useTheme();
@@ -38,6 +39,9 @@ const EmployeesScreen = ({navigation}: Props) => {
   const [visible, setVisible] = useState(false);
   const [resetPwdVisible, setResetPwdVisible] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
+  const [visibleDetail, setVisibleDetail] = useState(false);
+  const [selectedCleaner, setSelectedCleaner] = useState<Cleaner>();
+  const [hostProperties, setHostProperties] = useState<Property[]>([]);
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
@@ -146,9 +150,28 @@ const EmployeesScreen = ({navigation}: Props) => {
     }
   };
 
+  const handleViewProperty = async (cleaner: Cleaner) => {
+    setLoading(true);
+    setSelectedCleaner(cleaner);
+    setVisibleDetail(true);
+    await getHostProperty(cleaner.id)
+      .then(response => {
+        if (response.success) {
+          console.log(response.data.properties);
+          setHostProperties(response.data.properties);
+        }
+      })
+      .catch(error => {
+        console.error('Failed to fetch users:', error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
   useEffect(() => {
     loadUsers();
-  }, [loadUsers]);
+  }, []);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -202,6 +225,7 @@ const EmployeesScreen = ({navigation}: Props) => {
             handleClickResetPwd={handleClickResetPwd}
             navigation={navigation}
             isCleaner={true}
+            handleShowProperty={handleViewProperty}
           />
         )}
         style={{
@@ -249,10 +273,111 @@ const EmployeesScreen = ({navigation}: Props) => {
           <CustomActivityIndicator loading={loading} />
         </View>
       </Modal>
+      {/* property details */}
+      <Modal isVisible={visibleDetail} style={globalStyles.modalContainerBack}>
+        <View
+          style={{
+            width: '100%',
+            backgroundColor: theme.colors.background,
+            borderRadius: theme.roundness,
+            padding: 10,
+          }}>
+          <View
+            style={{
+              borderBottomColor: theme.colors.secondary,
+              borderBottomWidth: 1,
+              marginBottom: 10,
+              paddingBottom: 10,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}>
+            <Text style={{fontSize: 20, fontWeight: 500}}>
+              {`${selectedCleaner?.first_name} ${selectedCleaner?.last_name}`}
+              's Properties
+            </Text>
+            <Button onPress={() => setVisibleDetail(false)}>close</Button>
+          </View>
+          <ScrollView
+            style={{
+              flexGrow: 0,
+            }}>
+            <CustomActivityIndicator loading={loading} />
+            {hostProperties.map((hp, index) => (
+              <View
+                key={hp.id}
+                style={[
+                  {marginBottom: 10},
+                  index !== hostProperties.length - 1
+                    ? {
+                        borderBottomWidth: 1,
+                        borderBottomColor: theme.colors.secondary,
+                        paddingVertical: 10,
+                      }
+                    : {},
+                ]}>
+                <View style={{flexDirection: 'row', marginBottom: 5}}>
+                  <Text style={{flex: 1}}>Account Number</Text>
+                  <Text style={{flex: 1}}>{hp.property_number}</Text>
+                </View>
+                <View style={{flexDirection: 'row', marginBottom: 5}}>
+                  <Text style={{flex: 1}}>Primary Cleaner</Text>
+                  <Text
+                    style={{
+                      flex: 1,
+                    }}>
+                    {hp.primary_cleaner}
+                  </Text>
+                </View>
+                <View style={{flexDirection: 'row', marginBottom: 5}}>
+                  <Text style={{flex: 1}}>Secondary Cleaner</Text>
+                  <Text
+                    style={{
+                      flex: 1,
+                    }}>
+                    {hp.secondary_cleaner}
+                  </Text>
+                </View>
+                <View style={{flexDirection: 'row', marginBottom: 5}}>
+                  <Text style={{flex: 1}}>Office</Text>
+                  <Text style={{flex: 1}}>{hp.office?.name}</Text>
+                </View>
+                <View style={{flexDirection: 'row', marginBottom: 5}}>
+                  <Text style={{flex: 1}}>Name</Text>
+                  <Text style={{flex: 1}}>{hp.name}</Text>
+                </View>
+                <View style={{flexDirection: 'row', marginBottom: 5}}>
+                  <Text style={{flex: 1}}>Address</Text>
+                  <Text
+                    style={{
+                      flex: 1,
+                    }}>{`${hp.address},${hp.zip_code}, ${hp.city}, ${hp.state}, ${hp.country}`}</Text>
+                </View>
+                <View
+                  style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
+                  <IconButton
+                    icon="pencil"
+                    mode="contained"
+                    size={20}
+                    onPress={() => {
+                      navigation.navigate('UpdateProperty', hp);
+                    }}
+                  />
+                </View>
+              </View>
+            ))}
+            {!hostProperties.length ? (
+              <View>
+                <Text>No record found!</Text>
+              </View>
+            ) : null}
+          </ScrollView>
+        </View>
+      </Modal>
 
       <ConfirmModal
         visible={visible}
-        title="Delete User"
+        title="Delete Record"
         contents="Are you sure want to delete this record?"
         confirmString={AppConstants.TITLE_DeleteRecord}
         cancelString={AppConstants.TITLE_Cancel}

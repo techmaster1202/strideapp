@@ -59,6 +59,7 @@ export const LABEL_SelectiveManager = 'Selective Manager';
 export const LABEL_Name = 'Name';
 export const LABEL_Price = 'Price';
 export const LABEL_Beds = 'Beds';
+export const LABEL_Bedrooms = 'Bedrooms';
 export const LABEL_Bathrooms = 'Bathrooms';
 export const LABEL_SquareFeet = 'Square Feet';
 export const LABEL_AccommodationSize = 'Accommodation Size';

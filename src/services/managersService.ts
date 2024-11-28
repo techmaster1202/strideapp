@@ -131,3 +131,17 @@ export const uploadAttachmentFile = async (url: string, data: FormData) => {
     throw error.response ? error.response.data : error.message;
   }
 };
+
+export const getAllCarsByManager = async (id: number) => {
+  try {
+    const response = await axiosInstance.get('cars/by/manager', {
+      params: {
+        cleaner: id,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.log('error', error.response.data);
+    throw error.response ? error.response.data : error.message;
+  }
+};

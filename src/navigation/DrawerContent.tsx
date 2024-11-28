@@ -4,7 +4,6 @@ import {View, StyleSheet, Dimensions, TouchableOpacity} from 'react-native';
 import {Text, Button, Divider, useTheme, Avatar} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import {useNavigationState} from '@react-navigation/native';
 import ThemeToggle from './ThemeToggle';
 import {useAppDispatch, useAppSelector} from '../store/hook';
 import {selectAuthState, userLoggedOut} from '../store/authSlice';

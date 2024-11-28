@@ -9,6 +9,7 @@ type UserCardProps = {
   handleClickResetPwd: (id: any) => void;
   handleClickDelete: (id: any) => void;
   isCleaner?: boolean;
+  handleShowProperty?: (item: Cleaner) => void;
 };
 
 const EmployeeCard = ({
@@ -17,6 +18,7 @@ const EmployeeCard = ({
   isCleaner = false,
   handleClickResetPwd,
   handleClickDelete,
+  handleShowProperty,
 }: UserCardProps) => {
   const theme = useTheme();
   return (
@@ -32,7 +34,7 @@ const EmployeeCard = ({
           </Text>
 
           <View style={styles.cardHeaderAction}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => handleShowProperty?.(item)}>
               <Text
                 variant="labelLarge"
                 style={{

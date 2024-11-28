@@ -1,4 +1,4 @@
-import {StyleSheet, View, FlatList} from 'react-native';
+import {StyleSheet, View, FlatList, ScrollView} from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {
   Button,
@@ -9,7 +9,7 @@ import {
   IconButton,
 } from 'react-native-paper';
 import {createGlobalStyles} from '../../utils/styles.ts';
-import {Props, Host} from '../../types/index.ts';
+import {Props, Host, Property} from '../../types/index.ts';
 import * as AppConstants from '../../constants/constants.ts';
 import CustomActivityIndicator from '../../components/CustomActivityIndicator.tsx';
 import Modal from 'react-native-modal';
@@ -19,7 +19,11 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import PageHeader from '../../components/PageHeader.tsx';
 import {useFocusEffect} from '@react-navigation/native';
 import ConfirmModal from '../../components/ConfirmModal.tsx';
-import {deleteHost, getHostList} from '../../services/hostsService.ts';
+import {
+  deleteHost,
+  getHostList,
+  getHostProperty,
+} from '../../services/hostsService.ts';
 import HostCard from '../../components/HostCard.tsx';
 
 const HostsScreen = ({navigation}: Props) => {
@@ -32,7 +36,10 @@ const HostsScreen = ({navigation}: Props) => {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [visible, setVisible] = useState(false);
+  const [visibleDetail, setVisibleDetail] = useState(false);
   const [selectedHostId, setSelectedHostId] = useState(null);
+  const [selectedHost, setSelectedHost] = useState<Host>();
+  const [hostProperties, setHostProperties] = useState<Property[]>([]);
 
   const loadHosts = useCallback(async () => {
     setLoading(true);
@@ -94,9 +101,29 @@ const HostsScreen = ({navigation}: Props) => {
     }
   };
 
+  const handleViewDetail = async (host: Host) => {
+    setLoading(true);
+    setSelectedHostId(host.id as any);
+    setSelectedHost(host);
+    setVisibleDetail(true);
+    await getHostProperty(host.id)
+      .then(response => {
+        if (response.success) {
+          console.log(response.data.properties);
+          setHostProperties(response.data.properties);
+        }
+      })
+      .catch(error => {
+        console.error('Failed to fetch users:', error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
   useEffect(() => {
     loadHosts();
-  }, [loadHosts]);
+  }, []);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -151,6 +178,7 @@ const HostsScreen = ({navigation}: Props) => {
             item={item}
             handleClickDelete={handleClickDelete}
             navigation={navigation}
+            handleViewDetail={handleViewDetail}
           />
         )}
         style={{
@@ -201,7 +229,7 @@ const HostsScreen = ({navigation}: Props) => {
 
       <ConfirmModal
         visible={visible}
-        title="Delete User"
+        title="Delete Record"
         contents="Are you sure want to delete this record?"
         confirmString={AppConstants.TITLE_DeleteRecord}
         cancelString={AppConstants.TITLE_Cancel}
@@ -210,6 +238,96 @@ const HostsScreen = ({navigation}: Props) => {
         onCancel={hideModal}
         confirmStyle="warning"
       />
+      {/* property details */}
+      <Modal isVisible={visibleDetail} style={globalStyles.modalContainerBack}>
+        <View
+          style={{
+            width: '100%',
+            backgroundColor: theme.colors.background,
+            borderRadius: theme.roundness,
+            padding: 10,
+          }}>
+          <View
+            style={{
+              borderBottomColor: theme.colors.secondary,
+              borderBottomWidth: 1,
+              marginBottom: 10,
+              paddingBottom: 10,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}>
+            <Text style={{fontSize: 20, fontWeight: 500}}>
+              {`${selectedHost?.first_name} ${selectedHost?.last_name}`}
+              's Properties
+            </Text>
+            <Button onPress={() => setVisibleDetail(false)}>close</Button>
+          </View>
+          <ScrollView
+            style={{
+              flexGrow: 0,
+            }}>
+            <CustomActivityIndicator loading={loading} />
+            {hostProperties.map((hp, index) => (
+              <View
+                key={hp.id}
+                style={[
+                  {marginBottom: 10},
+                  index !== hostProperties.length - 1
+                    ? {
+                        borderBottomWidth: 1,
+                        borderBottomColor: theme.colors.secondary,
+                        paddingVertical: 10,
+                      }
+                    : {},
+                ]}>
+                <View style={{flexDirection: 'row', marginBottom: 5}}>
+                  <Text style={{flex: 1}}>Account Number</Text>
+                  <Text style={{flex: 1}}>{hp.property_number}</Text>
+                </View>
+                <View style={{flexDirection: 'row', marginBottom: 5}}>
+                  <Text style={{flex: 1}}>Host</Text>
+                  <Text
+                    style={{
+                      flex: 1,
+                    }}>{`${hp.host?.first_name} ${hp.host?.last_name}`}</Text>
+                </View>
+                <View style={{flexDirection: 'row', marginBottom: 5}}>
+                  <Text style={{flex: 1}}>Office</Text>
+                  <Text style={{flex: 1}}>{hp.office?.name}</Text>
+                </View>
+                <View style={{flexDirection: 'row', marginBottom: 5}}>
+                  <Text style={{flex: 1}}>Name</Text>
+                  <Text style={{flex: 1}}>{hp.name}</Text>
+                </View>
+                <View style={{flexDirection: 'row', marginBottom: 5}}>
+                  <Text style={{flex: 1}}>Address</Text>
+                  <Text
+                    style={{
+                      flex: 1,
+                    }}>{`${hp.address},${hp.zip_code}, ${hp.city}, ${hp.state}, ${hp.country}`}</Text>
+                </View>
+                <View
+                  style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
+                  <IconButton
+                    icon="pencil"
+                    mode="contained"
+                    size={20}
+                    onPress={() => {
+                      navigation.navigate('UpdateProperty', hp);
+                    }}
+                  />
+                </View>
+              </View>
+            ))}
+            {!hostProperties.length ? (
+              <View>
+                <Text>No record found!</Text>
+              </View>
+            ) : null}
+          </ScrollView>
+        </View>
+      </Modal>
 
       <CustomActivityIndicator loading={loading} />
     </SafeAreaView>

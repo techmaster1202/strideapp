@@ -254,8 +254,8 @@ const UpdatePropertyScreen = ({route, navigation}: UpdateUserScreenProps) => {
               render={({field: {onChange, value}}) => (
                 <Dropdown
                   mode="outlined"
-                  label={AppConstants.LABEL_Beds}
-                  placeholder={AppConstants.LABEL_Beds}
+                  label={AppConstants.LABEL_Bedrooms}
+                  placeholder={AppConstants.LABEL_Bedrooms}
                   options={beds}
                   value={value?.toString()}
                   onSelect={onChange}
@@ -292,7 +292,30 @@ const UpdatePropertyScreen = ({route, navigation}: UpdateUserScreenProps) => {
                 </Text>
               )}
             </View>
-
+            <Controller
+              control={control}
+              rules={{}}
+              render={({field: {onChange, onBlur, value}}) => (
+                <TextInput
+                  label={AppConstants.LABEL_SquareFeet}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  mode="outlined"
+                  placeholder={AppConstants.LABEL_SquareFeet}
+                  textContentType="none"
+                  style={globalStyles.textInput}
+                />
+              )}
+              name="square_feet"
+            />
+            <View style={globalStyles.errorField}>
+              {errors.square_feet?.message && (
+                <Text style={globalStyles.errorText}>
+                  {errors.square_feet?.message}
+                </Text>
+              )}
+            </View>
             <Controller
               control={control}
               rules={{
@@ -604,7 +627,7 @@ const UpdatePropertyScreen = ({route, navigation}: UpdateUserScreenProps) => {
               )}
             </View>
             <Text>More Detail</Text>
-            <View style={{flexDirection: 'row', marginBottom: 5, gap: 4}}>
+            <View style={{marginBottom: 15, gap: 4}}>
               <Controller
                 control={control}
                 rules={{}}

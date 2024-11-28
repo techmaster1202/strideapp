@@ -149,7 +149,7 @@ const RolesScreen = ({navigation}: Props) => {
 
       <ConfirmModal
         visible={visible}
-        title="Delete Role"
+        title="Delete Record"
         contents="Are you sure want to delete this record?"
         confirmString={AppConstants.TITLE_DeleteRecord}
         cancelString={AppConstants.TITLE_Cancel}

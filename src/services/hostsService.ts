@@ -79,3 +79,14 @@ export const deleteHost = async (id: number): Promise<APIResponse> => {
     throw error.response ? error.response.data : error.message;
   }
 };
+
+export const getHostProperty = async (host: number): Promise<APIResponse> => {
+  try {
+    const response = await axiosInstance.get<APIResponse>('properties', {
+      params: {host},
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error.response ? error.response.data : error.message;
+  }
+};

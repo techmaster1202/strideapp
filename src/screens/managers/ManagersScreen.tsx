@@ -1,4 +1,4 @@
-import {StyleSheet, View, FlatList} from 'react-native';
+import {StyleSheet, View, FlatList, ScrollView} from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {
   Button,
@@ -9,10 +9,11 @@ import {
   IconButton,
 } from 'react-native-paper';
 import {createGlobalStyles} from '../../utils/styles.ts';
-import {Props, Cleaner} from '../../types/index.ts';
+import {Props, Cleaner, Car} from '../../types/index.ts';
 import * as AppConstants from '../../constants/constants.ts';
 import {
   deleteManager,
+  getAllCarsByManager,
   getManagerList,
   resetManagerPassword,
 } from '../../services/managersService.ts';
@@ -32,12 +33,15 @@ const ManagersScreen = ({navigation}: Props) => {
 
   const [keyword, setKeyword] = useState('');
   const [users, setUsers] = useState<Cleaner[]>([]);
+  const [cars, setCars] = useState<Car[]>([]);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [visible, setVisible] = useState(false);
+  const [visibleCars, setVisibleCars] = useState(false);
   const [resetPwdVisible, setResetPwdVisible] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
+  const [selectedCleaner, setSelectedCleaner] = useState<Cleaner>();
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
@@ -146,6 +150,23 @@ const ManagersScreen = ({navigation}: Props) => {
     }
   };
 
+  const handleShowProperty = async (cleaner: Cleaner) => {
+    try {
+      setSelectedCleaner(cleaner);
+      setVisibleCars(true);
+      setLoading(true);
+      const response = await getAllCarsByManager(cleaner.id);
+      setCars(response.data.cars);
+    } catch (error: any) {
+      Toast.show({
+        type: 'error',
+        text1: error.message || 'Something went wrong, please try again.',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadUsers();
   }, [loadUsers]);
@@ -198,6 +219,7 @@ const ManagersScreen = ({navigation}: Props) => {
             handleClickDelete={handleClickDelete}
             handleClickResetPwd={handleClickResetPwd}
             navigation={navigation}
+            handleShowProperty={handleShowProperty}
           />
         )}
         style={{
@@ -245,10 +267,88 @@ const ManagersScreen = ({navigation}: Props) => {
           <CustomActivityIndicator loading={loading} />
         </View>
       </Modal>
+      {/* shows all cars by manager  */}
+      <Modal isVisible={visibleCars} style={globalStyles.modalContainerBack}>
+        <View
+          style={{
+            width: '100%',
+            backgroundColor: theme.colors.background,
+            borderRadius: theme.roundness,
+            padding: 10,
+          }}>
+          <View
+            style={{
+              borderBottomColor: theme.colors.secondary,
+              borderBottomWidth: 1,
+              marginBottom: 10,
+              paddingBottom: 10,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}>
+            <Text style={{fontSize: 20, fontWeight: 500}}>
+              {`${selectedCleaner?.first_name} ${selectedCleaner?.last_name}`}
+              's Vehicles
+            </Text>
+            <Button onPress={() => setVisibleCars(false)}>close</Button>
+          </View>
+          <ScrollView
+            style={{
+              flexGrow: 0,
+            }}>
+            <CustomActivityIndicator loading={loading} />
+            {cars.map((car, index) => (
+              <View
+                key={car.id}
+                style={[
+                  {marginBottom: 10},
+                  index !== cars.length - 1
+                    ? {
+                        borderBottomWidth: 1,
+                        borderBottomColor: theme.colors.secondary,
+                        paddingVertical: 10,
+                      }
+                    : {},
+                ]}>
+                <View style={{flexDirection: 'row', marginBottom: 5}}>
+                  <Text style={{flex: 1}}>CAR NAME</Text>
+                  <Text style={{flex: 1}}>{car.name}</Text>
+                </View>
+                <View style={{flexDirection: 'row', marginBottom: 5}}>
+                  <Text style={{flex: 1}}>NOTES</Text>
+                  <Text
+                    style={{
+                      flex: 1,
+                    }}>
+                    {car.notes}
+                  </Text>
+                </View>
+
+                <View
+                  style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
+                  <IconButton
+                    icon="pencil"
+                    mode="contained"
+                    size={20}
+                    onPress={() => {
+                      navigation.navigate('UpdateCar', car);
+                    }}
+                  />
+                </View>
+              </View>
+            ))}
+            {cars.length <= 0 ? (
+              <View>
+                <Text>No record found!</Text>
+              </View>
+            ) : null}
+          </ScrollView>
+        </View>
+      </Modal>
 
       <ConfirmModal
         visible={visible}
-        title="Delete User"
+        title="Delete Record"
         contents="Are you sure want to delete this record?"
         confirmString={AppConstants.TITLE_DeleteRecord}
         cancelString={AppConstants.TITLE_Cancel}

@@ -207,7 +207,7 @@ export interface Property {
   city: string;
   country: string;
   host: {id: number; first_name: string; last_name: string};
-  office?: string;
+  office?: Record<string, any>;
   primary_cleaner: string;
   secondary_cleaner: string;
   state: string;
