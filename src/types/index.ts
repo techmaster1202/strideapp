@@ -214,6 +214,38 @@ export interface Property {
   zip_code: string;
 }
 
+export interface EventDetailedFormData {
+  property_id: number | null;
+  description: string;
+  start: string;
+  end: string;
+  time: string;
+  start_time: string;
+  end_time: string;
+  summary: string;
+  cleaner_id: number | null;
+  car_id: number | null;
+  car_name: string;
+  delivery_location: string;
+  return_location: string;
+  about_guest: string;
+  first_name: string;
+  last_name: string;
+}
+export interface JobDetailedFormData {
+  property_id: null | number;
+  start: string;
+  start_time: string;
+  assigned_to: null | number;
+  secondary_assigned_to: null | number;
+  description: string;
+  end: string;
+  end_time: string;
+  car_id: null | number;
+  delivery_location: string;
+  return_location: string;
+  about_guest: string;
+}
 export interface RoleOption {
   value: string;
   label: string;

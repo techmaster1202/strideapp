@@ -15,6 +15,7 @@ export default function AppDrawer() {
       initialRouteName="Calendar"
       screenOptions={{
         headerShown: false,
+        lazy: false,
       }}
       drawerContent={props => <DrawerContent {...props} />}>
       {Screens.map(({name, component, icon}) => (
