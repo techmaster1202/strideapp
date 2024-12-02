@@ -14,7 +14,11 @@ import * as AppConstants from '../constants/constants';
 import {useFocusEffect} from '@react-navigation/native';
 import {Button, Portal, TextInput, useTheme} from 'react-native-paper';
 import {addMinutes, endOfMonth, format, parse, startOfMonth} from 'date-fns';
-import {createNewJob, getCalendarEvents} from '../services/calendarService';
+import {
+  createNewJob,
+  createStripeSubscription,
+  getCalendarEvents,
+} from '../services/calendarService';
 import groupBy from 'lodash/groupBy';
 import Toast from 'react-native-toast-message';
 import {
@@ -31,11 +35,15 @@ import Modal from 'react-native-modal';
 import {Controller, useForm} from 'react-hook-form';
 import {getCleanerList} from '../services/cleanersService.ts';
 import {getCarList} from '../services/carsService.ts';
-import {getPropertyList} from '../services/propertiesService.ts';
 import {Picker} from '@react-native-picker/picker';
 import DatePicker from 'react-native-date-picker';
 import {LogBox} from 'react-native';
 import {debounce} from 'lodash';
+import {PaymentSheetError, useStripe} from '@stripe/stripe-react-native';
+import {useAppDispatch, useAppSelector} from '../store/hook.ts';
+import {selectAuthState, userLoggedIn} from '../store/authSlice.ts';
+import {STORAGE_KEY} from '../utils/constantKey.ts';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 LogBox.ignoreLogs(['ReactImageView', 'A props object containing a key']);
 
@@ -45,6 +53,7 @@ export const getDate = (offset = 0) =>
   );
 
 const TimelineCalendarScreen = ({navigation}: Props) => {
+  const authState = useAppSelector(selectAuthState);
   const theme = useTheme();
   const globalStyles = createGlobalStyles(theme);
   const [currentDate, setCurrentDate] = useState(getDate());
@@ -63,6 +72,8 @@ const TimelineCalendarScreen = ({navigation}: Props) => {
   );
   const [openStartDatePicker, setOpenStartDatePicker] = useState(false);
   const [openEndDatePicker, setOpenEndDatePicker] = useState(false);
+  const {initPaymentSheet, presentPaymentSheet} = useStripe();
+  const dispatch = useAppDispatch();
 
   const {
     control,
@@ -219,6 +230,83 @@ const TimelineCalendarScreen = ({navigation}: Props) => {
     [],
   );
 
+  const initializePaymentSheet = async () => {
+    try {
+      //caling our backend api to get clientSecret
+      const res = await createStripeSubscription();
+      const {error} = await initPaymentSheet({
+        merchantDisplayName: 'Stride',
+        paymentIntentClientSecret: res.clientSecret,
+        returnURL: 'strideapp://payment-sheet',
+
+        // Set `allowsDelayedPaymentMethods` to true if your business handles
+        // delayed notification payment methods like US bank accounts.
+        allowsDelayedPaymentMethods: true,
+      });
+      if (error) {
+        // Handle error
+        console.log(error);
+        Toast.show({
+          type: 'error',
+          text1: error.message || 'Something went wrong, please try again.',
+        });
+        return false;
+      }
+      return true;
+    } catch (error: any) {
+      console.log('got error here');
+      console.log(error.message);
+      Toast.show({
+        type: 'error',
+        text1: error.message || 'Something went wrong, please try again.',
+      });
+    }
+  };
+
+  const triggerPaymentSheet = async () => {
+    const init = await initializePaymentSheet();
+    if (!init) {
+      return;
+    }
+    const {error} = await presentPaymentSheet();
+    if (error) {
+      console.log(error);
+      if (error.code === PaymentSheetError.Failed) {
+        Toast.show({
+          type: 'error',
+          text1: error.message || 'Payment failed.',
+        });
+        // Handle failed
+      } else if (error.code === PaymentSheetError.Canceled) {
+        // Handle canceled
+        Toast.show({
+          type: 'error',
+          text1: error.message || 'Payment Canceled.',
+        });
+      }
+    } else {
+      // Payment succeeded
+      Toast.show({
+        type: 'success',
+        text1: 'subscription completed',
+      });
+      const userDataStr = await AsyncStorage.getItem(STORAGE_KEY);
+      if (userDataStr) {
+        const userData = {...JSON.parse(userDataStr), shouldSubscribe: false};
+        dispatch(userLoggedIn({...userData}));
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({...userData}));
+      }
+    }
+  };
+
+  useEffect(() => {
+    // initializePaymentSheet();
+    if (authState.shouldSubscribe) {
+      triggerPaymentSheet();
+    }
+    console.log(authState.shouldSubscribe);
+  }, [authState]);
+
   useEffect(() => {
     fetchFilteredEvents(currentDate, debouncedKeyword, true);
   }, [debouncedKeyword]);
@@ -240,10 +328,10 @@ const TimelineCalendarScreen = ({navigation}: Props) => {
     getCarList('').then(res => {
       setCars(res.data.cars);
     });
-    getPropertyList('', 1).then(res => {
-      // setProperties(res.data.properties);
-      console.log(res.data);
-    });
+    // getPropertyList('', 1).then(res => {
+    //   // setProperties(res.data.properties);
+    //   console.log(res.data);
+    // });
   }, []);
 
   const timelineProps: Partial<TimelineProps> = {

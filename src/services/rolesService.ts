@@ -4,8 +4,6 @@ import {APIResponse} from '../types';
 export const getRoleList = async (): Promise<APIResponse> => {
   try {
     const response = await axiosInstance.get<APIResponse>('roles');
-    console.log('roles');
-    console.log(response.data.data);
     return response.data;
   } catch (error: any) {
     throw error.response ? error.response.data : error.message;

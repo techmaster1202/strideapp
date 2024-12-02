@@ -43,7 +43,10 @@ export default function SignInScreen({navigation}: Props) {
             sessionTimedOut: false,
             isLoggedIn: true,
             darkMode: false,
+            shouldSubscribe: response.data?.should_subscribe,
           };
+          console.log('after login');
+          console.log(response.data);
           dispatch(userLoggedIn(user));
           AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(user));
         }

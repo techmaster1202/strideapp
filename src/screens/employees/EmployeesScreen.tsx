@@ -67,7 +67,10 @@ const EmployeesScreen = ({navigation}: Props) => {
         }
       })
       .catch(error => {
-        console.error('Failed to fetch users:', error);
+        Toast.show({
+          type: 'error',
+          text1: error.message,
+        });
       })
       .finally(() => {
         setLoading(false);

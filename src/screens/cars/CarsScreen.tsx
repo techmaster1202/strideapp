@@ -180,8 +180,11 @@ const CarsScreen = ({navigation}: Props) => {
         endDate.toISOString(),
       );
       setEvents(data);
-    } catch (error) {
-      console.error('Error fetching events:', error);
+    } catch (error: any) {
+      Toast.show({
+        type: 'error',
+        text1: error?.message || 'unable to get events',
+      });
     }
   }, [startDate]);
 
@@ -272,7 +275,10 @@ const CarsScreen = ({navigation}: Props) => {
         }
       })
       .catch(error => {
-        console.error('Failed to fetch users:', error);
+        Toast.show({
+          type: 'error',
+          text1: error.message,
+        });
       })
       .finally(() => {
         setLoading(false);

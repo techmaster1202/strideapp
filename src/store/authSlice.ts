@@ -2,7 +2,6 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {RootState} from './appStore';
 import {IAuthState} from '../interfaces/IAuthentication.ts';
-import {UserProfile} from '../types/index.ts';
 
 const initialState: IAuthState = {
   user: null,
@@ -10,6 +9,7 @@ const initialState: IAuthState = {
   sessionTimedOut: false,
   isLoggedIn: false,
   darkMode: false,
+  shouldSubscribe: false,
 };
 
 export const authSlice = createSlice({
@@ -21,6 +21,7 @@ export const authSlice = createSlice({
       state.token = action.payload.token;
       state.sessionTimedOut = action.payload.sessionTimedOut;
       state.isLoggedIn = action.payload.isLoggedIn;
+      state.shouldSubscribe = action.payload.shouldSubscribe;
     },
     userLoggedOut: state => {
       state.user = null;
@@ -28,6 +29,7 @@ export const authSlice = createSlice({
       state.sessionTimedOut = false;
       state.darkMode = false;
       state.isLoggedIn = false;
+      state.shouldSubscribe = false;
     },
     userProfileUpdated: (state, action: PayloadAction<IAuthState>) => {
       if (action.payload.user) {

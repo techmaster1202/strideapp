@@ -22,3 +22,13 @@ export const createNewJob = async (data: JobDetailedFormData) => {
     throw error.response ? error.response.data : error.message;
   }
 };
+
+export const createStripeSubscription = async () => {
+  try {
+    const response = await axiosInstance.get('stripe/create_subscription');
+    return response.data;
+  } catch (error: any) {
+    console.log('error', error.response);
+    throw error.response ? error.response.data : error.message;
+  }
+};

@@ -6,4 +6,5 @@ export interface IAuthState {
   sessionTimedOut: boolean;
   isLoggedIn: boolean;
   darkMode: boolean;
+  shouldSubscribe: boolean;
 }
