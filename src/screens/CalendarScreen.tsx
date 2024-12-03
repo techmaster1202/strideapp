@@ -44,8 +44,12 @@ import {useAppDispatch, useAppSelector} from '../store/hook.ts';
 import {selectAuthState, userLoggedIn} from '../store/authSlice.ts';
 import {STORAGE_KEY} from '../utils/constantKey.ts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useRoleAndPermission} from '../context/RoleAndPermissionContext.tsx';
 
-LogBox.ignoreLogs(['ReactImageView', 'A props object containing a key']);
+LogBox.ignoreLogs([
+  'ReactImageView',
+  'A props object containing a "key" prop is being spread into JSX',
+]);
 
 export const getDate = (offset = 0) =>
   CalendarUtils.getCalendarDateString(
@@ -54,6 +58,7 @@ export const getDate = (offset = 0) =>
 
 const TimelineCalendarScreen = ({navigation}: Props) => {
   const authState = useAppSelector(selectAuthState);
+  const {hasAnyPermission} = useRoleAndPermission();
   const theme = useTheme();
   const globalStyles = createGlobalStyles(theme);
   const [currentDate, setCurrentDate] = useState(getDate());
@@ -196,7 +201,7 @@ const TimelineCalendarScreen = ({navigation}: Props) => {
         });
         setMarked(marks);
       } catch (error: any) {
-        console.error('Error fetching events:', error);
+        console.log('Error fetching events:', error);
         Toast.show({
           type: 'error',
           text1: error.message || 'Something went wrong, please try again.',
@@ -244,8 +249,6 @@ const TimelineCalendarScreen = ({navigation}: Props) => {
         allowsDelayedPaymentMethods: true,
       });
       if (error) {
-        // Handle error
-        console.log(error);
         Toast.show({
           type: 'error',
           text1: error.message || 'Something went wrong, please try again.',
@@ -254,8 +257,6 @@ const TimelineCalendarScreen = ({navigation}: Props) => {
       }
       return true;
     } catch (error: any) {
-      console.log('got error here');
-      console.log(error.message);
       Toast.show({
         type: 'error',
         text1: error.message || 'Something went wrong, please try again.',
@@ -270,7 +271,6 @@ const TimelineCalendarScreen = ({navigation}: Props) => {
     }
     const {error} = await presentPaymentSheet();
     if (error) {
-      console.log(error);
       if (error.code === PaymentSheetError.Failed) {
         Toast.show({
           type: 'error',
@@ -300,16 +300,22 @@ const TimelineCalendarScreen = ({navigation}: Props) => {
   };
 
   useEffect(() => {
-    // initializePaymentSheet();
     if (authState.shouldSubscribe) {
       triggerPaymentSheet();
     }
-    console.log(authState.shouldSubscribe);
   }, [authState]);
 
   useEffect(() => {
     fetchFilteredEvents(currentDate, debouncedKeyword, true);
   }, [debouncedKeyword]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (authState.shouldSubscribe) {
+        // triggerPaymentSheet();
+      }
+    }, [authState.shouldSubscribe]),
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -322,12 +328,16 @@ const TimelineCalendarScreen = ({navigation}: Props) => {
   );
 
   useEffect(() => {
-    getCleanerList('', 1).then(res => {
-      setCleaners(res.data.users);
-    });
-    getCarList('').then(res => {
-      setCars(res.data.cars);
-    });
+    getCleanerList('', 1)
+      .then(res => {
+        setCleaners(res.data.users);
+      })
+      .catch(console.log);
+    getCarList('')
+      .then(res => {
+        setCars(res.data.cars);
+      })
+      .catch(console.log);
     // getPropertyList('', 1).then(res => {
     //   // setProperties(res.data.properties);
     //   console.log(res.data);
@@ -369,6 +379,12 @@ const TimelineCalendarScreen = ({navigation}: Props) => {
         <Button
           mode="contained"
           style={[globalStyles.defaultModalButton, {width: 'auto'}]}
+          disabled={
+            !hasAnyPermission?.([
+              'create-appointments',
+              'create-car-appointments',
+            ])
+          }
           onPress={() => setVisible(true)}>
           {AppConstants.TITLE_Add}
         </Button>
@@ -432,40 +448,48 @@ const TimelineCalendarScreen = ({navigation}: Props) => {
                 <View style={{marginBottom: 10}}>
                   <Text style={{fontSize: 20}}>Add New Job</Text>
                 </View>
-                <View
-                  style={{
-                    borderWidth: 1,
-                    borderColor: theme.colors.secondary,
-                    borderRadius: 4,
-                  }}>
-                  <Controller
-                    control={control}
-                    rules={{
-                      required: {
-                        message: AppConstants.ERROR_CarRequired,
-                        value: true,
-                      },
-                    }}
-                    render={({field: {onChange, value}}) => (
-                      <Picker
-                        onValueChange={onChange}
-                        selectedValue={value}
-                        placeholder={AppConstants.LABEL_Car}>
-                        {cars.map(c => (
-                          <Picker.Item value={c.id} label={c.name} key={c.id} />
-                        ))}
-                      </Picker>
-                    )}
-                    name="car_id"
-                  />
-                </View>
-                <View style={globalStyles.errorField}>
-                  {errors.car_id?.message && (
-                    <Text style={globalStyles.errorText}>
-                      {errors.car_id?.message}
-                    </Text>
-                  )}
-                </View>
+                {cars.length ? (
+                  <>
+                    <View
+                      style={{
+                        borderWidth: 1,
+                        borderColor: theme.colors.secondary,
+                        borderRadius: 4,
+                      }}>
+                      <Controller
+                        control={control}
+                        rules={{
+                          required: {
+                            message: AppConstants.ERROR_CarRequired,
+                            value: true,
+                          },
+                        }}
+                        render={({field: {onChange, value}}) => (
+                          <Picker
+                            onValueChange={onChange}
+                            selectedValue={value}
+                            placeholder={AppConstants.LABEL_Car}>
+                            {cars.map(c => (
+                              <Picker.Item
+                                value={c.id}
+                                label={c.name}
+                                key={c.id}
+                              />
+                            ))}
+                          </Picker>
+                        )}
+                        name="car_id"
+                      />
+                    </View>
+                    <View style={globalStyles.errorField}>
+                      {errors.car_id?.message && (
+                        <Text style={globalStyles.errorText}>
+                          {errors.car_id?.message}
+                        </Text>
+                      )}
+                    </View>
+                  </>
+                ) : null}
 
                 <Controller
                   control={control}

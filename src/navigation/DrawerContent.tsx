@@ -15,6 +15,7 @@ import * as AppConstants from '../constants/constants.ts';
 type Props = {
   state: any;
   navigation: Navigation;
+  drawerItems: {label: string; icon: string; screen: string}[];
 };
 const DrawerContent = (props: Props) => {
   const theme = useTheme();
@@ -27,18 +28,7 @@ const DrawerContent = (props: Props) => {
   const firstName = authState?.user?.first_name ?? '';
   const lastName = authState?.user?.last_name ?? '';
   const avatarUrl = `https://ui-avatars.com/api/?name=${firstName}+${lastName}&color=187a74&background=EBF4FF`;
-
-  const drawerItems = [
-    {label: 'Calendar', icon: 'calendar', screen: 'Calendar'},
-    {label: 'Clients', icon: 'account-group', screen: 'Clients'},
-    {label: 'Properties', icon: 'home-city', screen: 'Properties'},
-    {label: 'Cars', icon: 'car', screen: 'Cars'},
-    {label: 'Managers', icon: 'account-tie', screen: 'Managers'},
-    {label: 'Employees', icon: 'account-tie', screen: 'Employees'},
-    {label: 'Users', icon: 'account', screen: 'Users'},
-    {label: 'Notifications', icon: 'bell', screen: 'Notifications'},
-    {label: 'Roles', icon: 'account-cog', screen: 'Roles'},
-  ];
+  const drawerItems = props.drawerItems;
 
   const handleLogout = async () => {
     await AsyncStorage.removeItem(STORAGE_KEY);
@@ -74,7 +64,7 @@ const DrawerContent = (props: Props) => {
               label={label}
               activeTintColor={theme.colors.primary}
               inactiveTintColor={theme.colors.secondary}
-              icon={({color, size}) => (
+              icon={({size}) => (
                 <Icon name={icon} color={theme.colors.secondary} size={size} />
               )}
               onPress={() => props.navigation.navigate(screen)}

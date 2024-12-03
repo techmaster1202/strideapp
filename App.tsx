@@ -22,6 +22,7 @@ import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {lightTheme, darkTheme} from './src/utils/customTheme';
 import {StripeProvider} from '@stripe/stripe-react-native';
 import {name as appName} from './app.json';
+import RolePermissionProvider from './src/context/RoleAndPermissionContext';
 
 const {LightTheme, DarkTheme} = adaptNavigationTheme({
   reactNavigationLight: NavigationDefaultTheme,
@@ -83,12 +84,14 @@ export default function App() {
         merchantIdentifier={`merchant.com.${appName}`}
         urlScheme={`${appName}`}>
         <Provider store={appStore}>
-          <PreferencesContext.Provider value={preferences}>
-            <PaperProvider theme={appTheme}>
-              <AppNavigator theme={appTheme as any} />
-              <Toast />
-            </PaperProvider>
-          </PreferencesContext.Provider>
+          <RolePermissionProvider>
+            <PreferencesContext.Provider value={preferences}>
+              <PaperProvider theme={appTheme}>
+                <AppNavigator theme={appTheme as any} />
+                <Toast />
+              </PaperProvider>
+            </PreferencesContext.Provider>
+          </RolePermissionProvider>
         </Provider>
       </StripeProvider>
     </GestureHandlerRootView>

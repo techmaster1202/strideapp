@@ -4,5 +4,6 @@ module.exports = {
   rules: {
     'react-native/no-inline-styles': 'off',
     'react-hooks/exhaustive-deps': 'warn',
+    'react/no-unstable-nested-components': 'off',
   },
 };
