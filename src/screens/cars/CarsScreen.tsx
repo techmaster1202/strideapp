@@ -21,7 +21,7 @@ import ConfirmModal from '../../components/ConfirmModal.tsx';
 import CarCard from '../../components/CarCard.tsx';
 import {deleteCar, getCarList, getEvents} from '../../services/carsService.ts';
 import CarAvailabilityTable from '../../components/CarAvailabilityTable.tsx';
-import {TabView} from 'react-native-tab-view';
+import {TabView, TabBar} from 'react-native-tab-view';
 import {addDays, format, parseISO, isWithinInterval} from 'date-fns';
 
 interface IProps {
@@ -131,7 +131,7 @@ const CarsView = ({
 
       <ConfirmModal
         visible={visible}
-        title="Delete Car"
+        title="Delete Record"
         contents="Are you sure want to delete this record?"
         confirmString={AppConstants.TITLE_DeleteRecord}
         cancelString={AppConstants.TITLE_Cancel}
@@ -146,6 +146,7 @@ const CarsView = ({
 };
 
 const CarsScreen = ({navigation}: Props) => {
+  const theme = useTheme();
   const [index, setIndex] = React.useState(0);
   const [routes] = React.useState([
     {key: 'cars', title: 'Cars'},
@@ -179,8 +180,11 @@ const CarsScreen = ({navigation}: Props) => {
         endDate.toISOString(),
       );
       setEvents(data);
-    } catch (error) {
-      console.error('Error fetching events:', error);
+    } catch (error: any) {
+      Toast.show({
+        type: 'error',
+        text1: error?.message || 'unable to get events',
+      });
     }
   }, [startDate]);
 
@@ -271,7 +275,10 @@ const CarsScreen = ({navigation}: Props) => {
         }
       })
       .catch(error => {
-        console.error('Failed to fetch users:', error);
+        Toast.show({
+          type: 'error',
+          text1: error.message,
+        });
       })
       .finally(() => {
         setLoading(false);
@@ -337,6 +344,7 @@ const CarsScreen = ({navigation}: Props) => {
       setKeyword('');
       setCars([]);
       setHasMore(true);
+      setIndex(0);
       loadCars();
     }, []),
   );
@@ -387,6 +395,9 @@ const CarsScreen = ({navigation}: Props) => {
         onIndexChange={setIndex}
         renderScene={renderScene}
         swipeEnabled={false}
+        renderTabBar={props => (
+          <TabBar {...props} style={{backgroundColor: theme.colors.primary}} />
+        )}
       />
     </>
   );

@@ -7,9 +7,15 @@ type HostCardProps = {
   item: Host;
   navigation: Navigation;
   handleClickDelete: (id: any) => void;
+  handleViewDetail: (host: Host) => void;
 };
 
-const HostCard = ({item, navigation, handleClickDelete}: HostCardProps) => {
+const HostCard = ({
+  item,
+  navigation,
+  handleClickDelete,
+  handleViewDetail,
+}: HostCardProps) => {
   const theme = useTheme();
   return (
     <Card
@@ -24,7 +30,7 @@ const HostCard = ({item, navigation, handleClickDelete}: HostCardProps) => {
           </Text>
 
           <View style={styles.cardHeaderAction}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => handleViewDetail(item)}>
               <Text
                 variant="labelLarge"
                 style={{
@@ -33,7 +39,7 @@ const HostCard = ({item, navigation, handleClickDelete}: HostCardProps) => {
                   paddingHorizontal: 10,
                   borderRadius: 30,
                 }}>
-                {item.cars_count ? item.cars_count : item.properties_count}
+                {item.properties_count}
               </Text>
             </TouchableOpacity>
           </View>

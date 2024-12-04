@@ -32,7 +32,10 @@ const RolesScreen = ({navigation}: Props) => {
         }
       })
       .catch(error => {
-        console.error('Failed to fetch roles:', error);
+        Toast.show({
+          type: 'error',
+          text1: error?.message,
+        });
       })
       .finally(() => {
         setLoading(false);
@@ -149,7 +152,7 @@ const RolesScreen = ({navigation}: Props) => {
 
       <ConfirmModal
         visible={visible}
-        title="Delete Role"
+        title="Delete Record"
         contents="Are you sure want to delete this record?"
         confirmString={AppConstants.TITLE_DeleteRecord}
         cancelString={AppConstants.TITLE_Cancel}

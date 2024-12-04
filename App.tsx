@@ -20,6 +20,9 @@ import AppNavigator from './src/navigation/AppNavigator';
 import {THEME_STORAGE_KEY} from './src/utils/constantKey';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {lightTheme, darkTheme} from './src/utils/customTheme';
+import {StripeProvider} from '@stripe/stripe-react-native';
+import {name as appName} from './app.json';
+import RolePermissionProvider from './src/context/RoleAndPermissionContext';
 
 const {LightTheme, DarkTheme} = adaptNavigationTheme({
   reactNavigationLight: NavigationDefaultTheme,
@@ -70,16 +73,27 @@ export default function App() {
 
   const appTheme = isThemeDark ? customDarkTheme : customLightTheme;
 
+  // (as public key not harmful but it's best practice) remove this after testing and fetch it from backend
+  const publicKey =
+    'pk_test_51PAjXfP98CkfUrpB5ED2Z87uwygNr3NEvrkjA3uCibHoJygq0LLD3bpfvJVWjenZOMoYF6OAAdctOZXyi4qW7A6t00tmppIwe5';
+
   return (
     <GestureHandlerRootView>
-      <Provider store={appStore}>
-        <PreferencesContext.Provider value={preferences}>
-          <PaperProvider theme={appTheme}>
-            <AppNavigator theme={appTheme} />
-            <Toast />
-          </PaperProvider>
-        </PreferencesContext.Provider>
-      </Provider>
+      <StripeProvider
+        publishableKey={publicKey}
+        merchantIdentifier={`merchant.com.${appName}`}
+        urlScheme={`${appName}`}>
+        <Provider store={appStore}>
+          <RolePermissionProvider>
+            <PreferencesContext.Provider value={preferences}>
+              <PaperProvider theme={appTheme}>
+                <AppNavigator theme={appTheme as any} />
+                <Toast />
+              </PaperProvider>
+            </PreferencesContext.Provider>
+          </RolePermissionProvider>
+        </Provider>
+      </StripeProvider>
     </GestureHandlerRootView>
   );
 }

@@ -264,8 +264,8 @@ const AddPropertyScreen = ({navigation}: UpdateUserScreenProps) => {
               render={({field: {onChange, value}}) => (
                 <Dropdown
                   mode="outlined"
-                  label={AppConstants.LABEL_Beds}
-                  placeholder={AppConstants.LABEL_Beds}
+                  label={AppConstants.LABEL_Bedrooms}
+                  placeholder={AppConstants.LABEL_Bedrooms}
                   options={beds}
                   value={value?.toString()}
                   onSelect={onChange}
@@ -305,12 +305,7 @@ const AddPropertyScreen = ({navigation}: UpdateUserScreenProps) => {
 
             <Controller
               control={control}
-              rules={{
-                pattern: {
-                  value: /^-?\d+(\.\d+)?$/i,
-                  message: AppConstants.ERROR_InvalidNumber,
-                },
-              }}
+              rules={{}}
               render={({field: {onChange, onBlur, value}}) => (
                 <TextInput
                   label={AppConstants.LABEL_SquareFeet}

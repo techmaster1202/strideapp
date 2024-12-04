@@ -1,7 +1,7 @@
 import React from 'react';
 import {Card, Divider, IconButton, Text, useTheme} from 'react-native-paper';
 import {Car, Navigation} from '../types';
-import {View, TouchableOpacity, StyleSheet} from 'react-native';
+import {View, StyleSheet} from 'react-native';
 
 type CarCardProps = {
   item: Car;
@@ -18,29 +18,14 @@ const CarCard = ({item, navigation, handleClickDelete}: CarCardProps) => {
         marginVertical: 10,
       }}>
       <Card.Content style={{paddingVertical: 5}}>
-        <View style={styles.cardHeader}>
+        <View style={[styles.cardHeader, {marginBottom: 5}]}>
           <Text variant="titleMedium" style={{maxWidth: 200}}>
             {item.name}
           </Text>
-
-          <View style={styles.cardHeaderAction}>
-            <TouchableOpacity>
-              <Text
-                variant="labelLarge"
-                style={{
-                  color: theme.colors.onTertiary,
-                  backgroundColor: theme.colors.tertiary,
-                  paddingHorizontal: 10,
-                  borderRadius: 30,
-                }}>
-                {item.license_plate}
-              </Text>
-            </TouchableOpacity>
-          </View>
         </View>
 
         <Divider />
-        <View>
+        <View style={{marginTop: 5}}>
           <View>
             <View style={{flexDirection: 'row'}}>
               <Text variant="labelLarge" style={{flex: 1}}>
@@ -82,6 +67,14 @@ const CarCard = ({item, navigation, handleClickDelete}: CarCardProps) => {
               </Text>
               <Text variant="labelLarge" style={{flex: 1}}>
                 {item.notes}
+              </Text>
+            </View>
+            <View style={{flexDirection: 'row'}}>
+              <Text variant="labelLarge" style={{flex: 1}}>
+                License Plate:
+              </Text>
+              <Text variant="labelLarge" style={{flex: 1}}>
+                {item.license_plate}
               </Text>
             </View>
           </View>

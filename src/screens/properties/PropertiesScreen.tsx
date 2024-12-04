@@ -47,7 +47,10 @@ const PropertiesScreen = ({navigation}: Props) => {
         }
       })
       .catch(error => {
-        console.error('Failed to fetch users:', error);
+        Toast.show({
+          type: 'error',
+          text1: error.message,
+        });
       })
       .finally(() => {
         setLoading(false);
@@ -100,7 +103,7 @@ const PropertiesScreen = ({navigation}: Props) => {
 
   useEffect(() => {
     loadProperties();
-  }, [loadProperties]);
+  }, []);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -202,7 +205,7 @@ const PropertiesScreen = ({navigation}: Props) => {
 
       <ConfirmModal
         visible={visible}
-        title="Delete User"
+        title="Delete Record"
         contents="Are you sure want to delete this record?"
         confirmString={AppConstants.TITLE_DeleteRecord}
         cancelString={AppConstants.TITLE_Cancel}

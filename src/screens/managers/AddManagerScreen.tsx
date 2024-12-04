@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {View} from 'react-native';
+import {ScrollView, View} from 'react-native';
 import {Button, Text, TextInput, useTheme} from 'react-native-paper';
 import {createGlobalStyles} from '../../utils/styles.ts';
 import {ManagerDetailFormData, Props} from '../../types/index.ts';
@@ -68,163 +68,166 @@ const AddManagerScreen = ({navigation}: Props) => {
         navigation={navigation}
         title={AppConstants.TITLE_AddManager}
       />
-      <View style={[globalStyles.container]}>
-        <View style={{width: '100%', marginBottom: 20}}>
-          <Controller
-            control={control}
-            rules={{
-              required: {
-                message: AppConstants.ERROR_FirstNameIsRequired,
-                value: true,
-              },
-              pattern: {
-                value: /^[A-Za-z]+$/i,
-                message: AppConstants.ERROR_InvalidName,
-              },
-            }}
-            render={({field: {onChange, onBlur, value}}) => (
-              <TextInput
-                label={AppConstants.LABEL_FirstName}
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                mode="outlined"
-                placeholder={AppConstants.PLACEHOLDER_FirstName}
-                textContentType="name"
-                style={globalStyles.textInput}
-              />
-            )}
-            name="firstName"
-          />
-          <View style={globalStyles.errorField}>
-            {errors.firstName?.message && (
-              <Text style={globalStyles.errorText}>
-                {errors.firstName?.message}
-              </Text>
-            )}
-          </View>
-
-          <Controller
-            control={control}
-            rules={{
-              required: {
-                message: AppConstants.ERROR_LastNameIsRequired,
-                value: true,
-              },
-              pattern: {
-                value: /^[A-Za-z]+$/i,
-                message: AppConstants.ERROR_InvalidName,
-              },
-            }}
-            render={({field: {onChange, onBlur, value}}) => (
-              <TextInput
-                label={AppConstants.LABEL_LastName}
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                mode="outlined"
-                placeholder={AppConstants.PLACEHOLDER_LastName}
-                textContentType="name"
-                style={globalStyles.textInput}
-              />
-            )}
-            name="lastName"
-          />
-          <View style={globalStyles.errorField}>
-            {errors.lastName?.message && (
-              <Text style={globalStyles.errorText}>
-                {errors.lastName?.message}
-              </Text>
-            )}
-          </View>
-
-          <Controller
-            control={control}
-            rules={{
-              required: {
-                message: AppConstants.ERROR_EmailIsRequired,
-                value: true,
-              },
-              validate: {
-                invalidEmail: value => {
-                  return validateEmail(value);
+      <ScrollView>
+        <View style={[globalStyles.container]}>
+          <View style={{width: '100%', marginBottom: 20}}>
+            <Controller
+              control={control}
+              rules={{
+                required: {
+                  message: AppConstants.ERROR_FirstNameIsRequired,
+                  value: true,
                 },
-              },
-            }}
-            render={({field: {onChange, onBlur, value}}) => (
-              <TextInput
-                label={AppConstants.LABEL_EmailAddress}
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                mode="outlined"
-                placeholder={AppConstants.PLACEHOLDER_Email}
-                textContentType="emailAddress"
-                style={globalStyles.textInput}
-              />
-            )}
-            name="emailAddress"
-          />
-          <View style={globalStyles.errorField}>
-            {errors.emailAddress && errors.emailAddress.type === 'required' && (
-              <Text style={globalStyles.errorText}>
-                {AppConstants.ERROR_EmailIsRequired}
-              </Text>
-            )}
-            {errors.emailAddress &&
-              errors.emailAddress.type === 'invalidEmail' && (
+                pattern: {
+                  value: /^[A-Za-z]+$/i,
+                  message: AppConstants.ERROR_InvalidName,
+                },
+              }}
+              render={({field: {onChange, onBlur, value}}) => (
+                <TextInput
+                  label={AppConstants.LABEL_FirstName}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  mode="outlined"
+                  placeholder={AppConstants.PLACEHOLDER_FirstName}
+                  textContentType="name"
+                  style={globalStyles.textInput}
+                />
+              )}
+              name="firstName"
+            />
+            <View style={globalStyles.errorField}>
+              {errors.firstName?.message && (
                 <Text style={globalStyles.errorText}>
-                  {AppConstants.ERROR_InvalidEmail}
+                  {errors.firstName?.message}
                 </Text>
               )}
+            </View>
+
+            <Controller
+              control={control}
+              rules={{
+                required: {
+                  message: AppConstants.ERROR_LastNameIsRequired,
+                  value: true,
+                },
+                pattern: {
+                  value: /^[A-Za-z]+$/i,
+                  message: AppConstants.ERROR_InvalidName,
+                },
+              }}
+              render={({field: {onChange, onBlur, value}}) => (
+                <TextInput
+                  label={AppConstants.LABEL_LastName}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  mode="outlined"
+                  placeholder={AppConstants.PLACEHOLDER_LastName}
+                  textContentType="name"
+                  style={globalStyles.textInput}
+                />
+              )}
+              name="lastName"
+            />
+            <View style={globalStyles.errorField}>
+              {errors.lastName?.message && (
+                <Text style={globalStyles.errorText}>
+                  {errors.lastName?.message}
+                </Text>
+              )}
+            </View>
+
+            <Controller
+              control={control}
+              rules={{
+                required: {
+                  message: AppConstants.ERROR_EmailIsRequired,
+                  value: true,
+                },
+                validate: {
+                  invalidEmail: value => {
+                    return validateEmail(value);
+                  },
+                },
+              }}
+              render={({field: {onChange, onBlur, value}}) => (
+                <TextInput
+                  label={AppConstants.LABEL_EmailAddress}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  mode="outlined"
+                  placeholder={AppConstants.PLACEHOLDER_Email}
+                  textContentType="emailAddress"
+                  style={globalStyles.textInput}
+                />
+              )}
+              name="emailAddress"
+            />
+            <View style={globalStyles.errorField}>
+              {errors.emailAddress &&
+                errors.emailAddress.type === 'required' && (
+                  <Text style={globalStyles.errorText}>
+                    {AppConstants.ERROR_EmailIsRequired}
+                  </Text>
+                )}
+              {errors.emailAddress &&
+                errors.emailAddress.type === 'invalidEmail' && (
+                  <Text style={globalStyles.errorText}>
+                    {AppConstants.ERROR_InvalidEmail}
+                  </Text>
+                )}
+            </View>
+
+            <Controller
+              control={control}
+              rules={{
+                required: {
+                  message: AppConstants.ERROR_PhoneNumberIsRequired,
+                  value: true,
+                },
+              }}
+              render={({field: {onChange, onBlur, value}}) => (
+                <TextInput
+                  label={AppConstants.LABEL_MobilePhone}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  mode="outlined"
+                  placeholder={AppConstants.PLACEHOLDER_Phone}
+                  textContentType="none"
+                  style={globalStyles.textInput}
+                />
+              )}
+              name="phoneNumber"
+            />
+            <View style={globalStyles.errorField}>
+              {errors.phoneNumber && errors.phoneNumber.type === 'required' && (
+                <Text style={globalStyles.errorText}>
+                  {AppConstants.ERROR_PhoneNumberIsRequired}
+                </Text>
+              )}
+              {errors.phoneNumber &&
+                errors.phoneNumber.type === 'invalidPhone' && (
+                  <Text style={globalStyles.errorText}>
+                    {AppConstants.ERROR_InvalidPhone}
+                  </Text>
+                )}
+            </View>
           </View>
 
-          <Controller
-            control={control}
-            rules={{
-              required: {
-                message: AppConstants.ERROR_PhoneNumberIsRequired,
-                value: true,
-              },
-            }}
-            render={({field: {onChange, onBlur, value}}) => (
-              <TextInput
-                label={AppConstants.LABEL_MobilePhone}
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                mode="outlined"
-                placeholder={AppConstants.PLACEHOLDER_Phone}
-                textContentType="none"
-                style={globalStyles.textInput}
-              />
-            )}
-            name="phoneNumber"
-          />
-          <View style={globalStyles.errorField}>
-            {errors.phoneNumber && errors.phoneNumber.type === 'required' && (
-              <Text style={globalStyles.errorText}>
-                {AppConstants.ERROR_PhoneNumberIsRequired}
-              </Text>
-            )}
-            {errors.phoneNumber &&
-              errors.phoneNumber.type === 'invalidPhone' && (
-                <Text style={globalStyles.errorText}>
-                  {AppConstants.ERROR_InvalidPhone}
-                </Text>
-              )}
-          </View>
+          <Button
+            mode="contained"
+            compact
+            style={globalStyles.defaultButton}
+            onPress={handleSubmit(onSubmit)}>
+            {AppConstants.TITLE_Save}
+          </Button>
+          <CustomActivityIndicator loading={loading} />
         </View>
-
-        <Button
-          mode="contained"
-          compact
-          style={globalStyles.defaultButton}
-          onPress={handleSubmit(onSubmit)}>
-          {AppConstants.TITLE_Save}
-        </Button>
-        <CustomActivityIndicator loading={loading} />
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
