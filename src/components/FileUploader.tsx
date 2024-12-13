@@ -53,9 +53,11 @@ const FileUploader = ({
   const renderFileItem = (item: Record<string, any>) => {
     return (
       <View style={styles.fileItem}>
-        <Text style={styles.fileName}>{truncateFileName(item.file_name)}</Text>
+        <Text style={styles.fileName}>
+          {truncateFileName(item?.file_name ?? item?.name)}
+        </Text>
         <Text style={styles.fileSize}>
-          {(Number(item.file_size) / 1024).toFixed(2)} KB
+          {(Number(item?.file_size ?? item?.size) / 1024).toFixed(2)} KB
         </Text>
 
         <IconButton

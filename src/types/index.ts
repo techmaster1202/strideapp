@@ -235,6 +235,7 @@ export interface EventDetailedFormData {
   last_name: string;
 }
 export interface JobDetailedFormData {
+  id?: number;
   property_id: null | number;
   start: string;
   start_time: string;
@@ -247,6 +248,10 @@ export interface JobDetailedFormData {
   delivery_location: string;
   return_location: string;
   about_guest: string;
+  first_name?: string;
+  last_name?: string;
+  car_name?: string;
+  summary?: string;
 }
 export interface RoleOption {
   value: string;

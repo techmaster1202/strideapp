@@ -3,7 +3,7 @@ import axios from 'axios';
 import {STORAGE_KEY} from './constantKey';
 
 const axiosInstance = axios.create({
-  baseURL: 'http://192.168.0.105:8000/api/', // Replace with your Laravel API base URL
+  baseURL: 'http://192.168.0.101:8000/api/', // Replace with your Laravel API base URL
   headers: {
     'Content-Type': 'application/json',
   },
