@@ -2,8 +2,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import {STORAGE_KEY} from './constantKey';
 
+export const baseIP = '192.168.0.101';
+
 const axiosInstance = axios.create({
-  baseURL: 'http://192.168.0.101:8000/api/', // Replace with your Laravel API base URL
+  baseURL: `http://${baseIP}:8000/api/`, // Replace with your Laravel API base URL
   headers: {
     'Content-Type': 'application/json',
   },

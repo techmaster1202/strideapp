@@ -61,6 +61,7 @@ const TimelineCalendarScreen = ({navigation}: Props) => {
   const [visibleEventModal, setVisibleEventModal] = useState(false);
   const [cars, setCars] = useState<Car[]>([]);
   // const [properties, setProperties] = useState<Property[]>([]);
+  const [allEvents, setAllEvents] = useState<Record<string, any>>();
   const [cleaners, setCleaners] = useState<Cleaner[]>([]);
   const [searchInput, setSearchInput] = useState('');
   const [debouncedKeyword, setDebouncedKeyword] = useState('');
@@ -181,6 +182,7 @@ const TimelineCalendarScreen = ({navigation}: Props) => {
           const dateKey = CalendarUtils.getCalendarDateString(ev.start);
           marks[dateKey] = {marked: true};
         });
+        setAllEvents(data);
         setMarked(marks);
       } catch (error: any) {
         console.log('Error fetching events:', error);
@@ -279,6 +281,24 @@ const TimelineCalendarScreen = ({navigation}: Props) => {
         dispatch(userLoggedIn({...userData}));
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({...userData}));
       }
+    }
+  };
+
+  const getNextEvent = (event: Record<string, any>) => {
+    let eventId = Number(event.id);
+    let start = event.start_time;
+    var nextEventId: number;
+    if (start) {
+      nextEventId = eventId + 1;
+    } else {
+      nextEventId = eventId - 1;
+    }
+    const nextEvent = allEvents?.find(
+      (ev: Record<string, any>) => ev.id === nextEventId,
+    );
+    setSelectedEvent(nextEvent);
+    if (!nextEvent) {
+      setVisibleEventModal(false);
     }
   };
 
@@ -428,6 +448,7 @@ const TimelineCalendarScreen = ({navigation}: Props) => {
         cars={cars}
         cleaners={cleaners}
         event={selectedEvent}
+        getNextEvent={getNextEvent}
         onRefresh={() => fetchFilteredEvents(currentDate, '', true)}
       />
 

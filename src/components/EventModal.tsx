@@ -39,6 +39,7 @@ interface IProps {
   event?: Record<string, any>;
   onClose: () => void;
   onRefresh?: () => Promise<void>;
+  getNextEvent: (event: Record<string, any>) => void;
 }
 
 function parseAndFormatDate(dateString: string) {
@@ -59,7 +60,7 @@ function parseAndFormatDate(dateString: string) {
   }
 
   // If no format works, throw an error
-  throw new Error('Invalid date format');
+  return '';
 }
 
 const EventModal = ({
@@ -68,6 +69,7 @@ const EventModal = ({
   cleaners,
   event,
   onClose,
+  getNextEvent,
   onRefresh,
 }: IProps) => {
   const authState = useAppSelector(selectAuthState);
@@ -80,6 +82,7 @@ const EventModal = ({
   const [showFinishConfirm, setShowFinishConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [photos, setPhotos] = useState<Record<string, any>[]>([]);
+  const [dropOff, setDropOff] = useState(true);
 
   const {
     control,
@@ -102,10 +105,7 @@ const EventModal = ({
         'start',
         event.start_time ? event.start_time : event.start ? event.start : '',
       );
-      setValue(
-        'end',
-        event.end_time ? event.end_time : event.end ? event.end : '',
-      );
+      setValue('end', event.end_time ? event.end_time : '');
       setValue('summary', event.summary ? event.summary : '');
       setValue('car_id', event.car ? event.car.id : '');
       setValue('car_name', event.car_name ? event.car_name : '');
@@ -126,7 +126,7 @@ const EventModal = ({
       setValue('first_name', authState.user?.first_name);
       setValue('first_name', authState.user?.last_name);
       setPhotos(event?.photos?.length ? event?.photos : []);
-      console.log(event?.photos);
+      setDropOff(!event.start_time);
     }
   }, [event]);
 
@@ -219,6 +219,8 @@ const EventModal = ({
       const payload = {...formData};
       payload.assigned_to = formData.cleaner_id;
       payload.secondary_assigned_to = formData.secondary_cleaner_id;
+      console.log(`startD ${startD}`);
+      console.log(`endD ${endD}`);
       payload.start = parseAndFormatDate(startD);
       console.log(payload.start);
       payload.end = parseAndFormatDate(endD);
@@ -285,6 +287,8 @@ const EventModal = ({
         type: 'error',
         text1: error.message || 'Something went wrong, please try again.',
       });
+    } finally {
+      await onRefresh?.();
     }
   };
 
@@ -330,8 +334,17 @@ const EventModal = ({
                   justifyContent: 'space-between',
                   alignItems: 'center',
                 }}>
-                <Text style={{fontSize: 20}}>Appointment Detail</Text>
-                <IconButton icon={'close'} onPress={onClose} />
+                <Text style={{fontSize: 20, flexWrap: 'wrap'}}>
+                  Appointment Detail
+                  {event?.appointment_type === 1 && startD
+                    ? ' - Drop Off'
+                    : event?.appointment_type === 1 && endD
+                    ? ' - Pick Up'
+                    : ''}
+                </Text>
+                <View style={{width: 40}}>
+                  <IconButton icon={'close'} onPress={onClose} />
+                </View>
               </View>
 
               <Text style={[styles.label]}>Assigned Manager:</Text>
@@ -453,41 +466,46 @@ const EventModal = ({
                   Vehicle Color: {selectedCar?.color}
                 </Text>
               </View>
-              <Controller
-                control={control}
-                rules={{}}
-                render={({field: {onChange, onBlur, value}}) => (
-                  <TextInput
-                    label={AppConstants.LABEL_DeliveryLocation}
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}
-                    mode="outlined"
-                    placeholder={AppConstants.LABEL_DeliveryLocation}
-                    textContentType="none"
-                    style={globalStyles.textInput}
+              {dropOff ? (
+                <Controller
+                  control={control}
+                  rules={{}}
+                  render={({field: {onChange, onBlur, value}}) => (
+                    <TextInput
+                      label={AppConstants.LABEL_DeliveryLocation}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                      mode="outlined"
+                      placeholder={AppConstants.LABEL_DeliveryLocation}
+                      textContentType="none"
+                      style={globalStyles.textInput}
+                    />
+                  )}
+                  name="delivery_location"
+                />
+              ) : (
+                <>
+                  <View style={{marginBottom: 16}} />
+                  <Controller
+                    control={control}
+                    rules={{}}
+                    render={({field: {onChange, onBlur, value}}) => (
+                      <TextInput
+                        label={AppConstants.LABEL_Returnlocation}
+                        onBlur={onBlur}
+                        onChangeText={onChange}
+                        value={value}
+                        mode="outlined"
+                        placeholder={AppConstants.LABEL_Returnlocation}
+                        textContentType="none"
+                        style={globalStyles.textInput}
+                      />
+                    )}
+                    name="return_location"
                   />
-                )}
-                name="delivery_location"
-              />
-              <View style={{marginBottom: 16}} />
-              <Controller
-                control={control}
-                rules={{}}
-                render={({field: {onChange, onBlur, value}}) => (
-                  <TextInput
-                    label={AppConstants.LABEL_Returnlocation}
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}
-                    mode="outlined"
-                    placeholder={AppConstants.LABEL_Returnlocation}
-                    textContentType="none"
-                    style={globalStyles.textInput}
-                  />
-                )}
-                name="return_location"
-              />
+                </>
+              )}
               <View style={{marginBottom: 16}} />
               <Controller
                 control={control}
@@ -508,65 +526,72 @@ const EventModal = ({
               />
 
               <View style={{marginBottom: 16}} />
-              <Controller
-                control={control}
-                rules={{}}
-                render={({field: {onChange, onBlur, value}}) => (
-                  <Pressable onPress={() => setOpenStartDatePicker(true)}>
-                    <TextInput
-                      label={AppConstants.LABEL_TripStartDate}
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      mode="outlined"
-                      placeholder={AppConstants.LABEL_TripStartDate}
-                      textContentType="none"
-                      style={globalStyles.textInput}
-                      readOnly
-                      // Make the input read-only to prevent keyboard popup
-                    />
-                  </Pressable>
-                )}
-                name="start"
-              />
-              <View style={{marginBottom: 16}} />
-              <Controller
-                control={control}
-                rules={{}}
-                render={({field: {onChange, onBlur, value}}) => (
-                  <Pressable onPress={() => setOpenEndDatePicker(true)}>
-                    <TextInput
-                      label={AppConstants.LABEL_TripEndDate}
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      mode="outlined"
-                      placeholder={AppConstants.LABEL_TripEndDate}
-                      textContentType="none"
-                      style={globalStyles.textInput}
-                      readOnly
-                      // Make the input read-only to prevent keyboard popup
-                    />
-                  </Pressable>
-                )}
-                name="end"
-              />
+              {startD ? (
+                <Controller
+                  control={control}
+                  rules={{}}
+                  render={({field: {onChange, onBlur, value}}) => (
+                    <Pressable onPress={() => setOpenStartDatePicker(true)}>
+                      <TextInput
+                        label={AppConstants.LABEL_TripStartDate}
+                        onBlur={onBlur}
+                        onChangeText={onChange}
+                        value={value}
+                        mode="outlined"
+                        placeholder={AppConstants.LABEL_TripStartDate}
+                        textContentType="none"
+                        style={globalStyles.textInput}
+                        readOnly
+                        // Make the input read-only to prevent keyboard popup
+                      />
+                    </Pressable>
+                  )}
+                  name="start"
+                />
+              ) : null}
+
+              {endD ? (
+                <>
+                  <View style={{marginBottom: 16}} />
+                  <Controller
+                    control={control}
+                    rules={{}}
+                    render={({field: {onChange, onBlur, value}}) => (
+                      <Pressable onPress={() => setOpenEndDatePicker(true)}>
+                        <TextInput
+                          label={AppConstants.LABEL_TripEndDate}
+                          onBlur={onBlur}
+                          onChangeText={onChange}
+                          value={value}
+                          mode="outlined"
+                          placeholder={AppConstants.LABEL_TripEndDate}
+                          textContentType="none"
+                          style={globalStyles.textInput}
+                          readOnly
+                          // Make the input read-only to prevent keyboard popup
+                        />
+                      </Pressable>
+                    )}
+                    name="end"
+                  />
+                </>
+              ) : null}
               <View style={{marginVertical: 10}}>
                 <FileUploader
                   label="Photos"
                   existingFiles={photos}
                   deleteFile={onDeleteFile}
                   uploadFile={file => uploadFile('image', file)}
+                  preview={true}
                 />
               </View>
               <View
                 style={{
                   flex: 1,
                   flexDirection: 'row',
-                  justifyContent: 'flex-end',
+                  justifyContent: 'center',
                   gap: 4,
                   marginTop: 10,
-                  paddingBottom: 30,
                 }}>
                 {hasAnyPermission?.('delete-appointments') ? (
                   <Button
@@ -604,6 +629,19 @@ const EventModal = ({
                     {AppConstants.TITLE_Save}
                   </Button>
                 ) : null}
+              </View>
+              <View
+                style={{
+                  paddingBottom: 50,
+                  marginTop: 10,
+                  justifyContent: 'center',
+                }}>
+                <Button
+                  onPress={() => getNextEvent(event as any)}
+                  mode="contained"
+                  style={[globalStyles.defaultModalButton, {width: 'auto'}]}>
+                  {startD ? 'PICK UP DATE' : 'DROP OF DATE'}
+                </Button>
               </View>
             </View>
             <CustomActivityIndicator loading={localLoading} />

@@ -1,18 +1,28 @@
 import React, {useState} from 'react';
-import {View, Text, TouchableOpacity, StyleSheet, FlatList} from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  FlatList,
+  Image,
+} from 'react-native';
 import DocumentPicker from 'react-native-document-picker';
 import {truncateFileName} from '../utils/helpers';
 import {IconButton, useTheme} from 'react-native-paper';
+import {baseIP} from '../utils/axiosInstance';
 
 interface IProps {
   label: string;
   existingFiles?: Record<string, any>[];
+  preview?: boolean;
   deleteFile?: (id: string) => Promise<void>;
   uploadFile: (file: Record<string, any>) => Promise<void>;
 }
 const FileUploader = ({
   label,
   existingFiles = [],
+  preview = false,
   deleteFile,
   uploadFile,
 }: IProps) => {
@@ -51,11 +61,23 @@ const FileUploader = ({
   };
 
   const renderFileItem = (item: Record<string, any>) => {
+    const imageUrl = item?.url?.includes('localhost')
+      ? item.url.replace('localhost', baseIP)
+      : item?.url?.startsWith('uploads')
+      ? `http://${baseIP}:8000/storage/${item.url}`
+      : item.url;
     return (
       <View style={styles.fileItem}>
-        <Text style={styles.fileName}>
-          {truncateFileName(item?.file_name ?? item?.name)}
-        </Text>
+        {preview ? (
+          <Image
+            source={{uri: imageUrl}}
+            style={[styles.filePreview, {objectFit: 'cover'}]}
+          />
+        ) : (
+          <Text style={styles.fileName}>
+            {truncateFileName(item?.file_name ?? item?.name)}
+          </Text>
+        )}
         <Text style={styles.fileSize}>
           {(Number(item?.file_size ?? item?.size) / 1024).toFixed(2)} KB
         </Text>
@@ -137,6 +159,11 @@ const styles = StyleSheet.create({
     color: 'red',
     fontWeight: 'bold',
     marginLeft: 8,
+  },
+  filePreview: {
+    width: 60,
+    height: 30,
+    borderRadius: 4,
   },
 });
 
