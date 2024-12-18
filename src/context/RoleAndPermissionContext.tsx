@@ -28,8 +28,6 @@ const RolePermissionProvider = ({children}: {children: React.ReactNode}) => {
           }
         });
       }
-      console.log('hasPermission ', hasPermission);
-      console.log(permissions);
       return hasPermission;
     },
     [authState.user],
@@ -53,8 +51,6 @@ const RolePermissionProvider = ({children}: {children: React.ReactNode}) => {
           }
         });
       }
-      console.log('hasRole ', hasRole);
-      console.log(roles);
       return hasRole;
     },
     [authState.user],

@@ -12,7 +12,7 @@ import PageHeader from '../components/PageHeader';
 import {Car, Cleaner, JobDetailedFormData, Props} from '../types';
 import * as AppConstants from '../constants/constants';
 import {useFocusEffect} from '@react-navigation/native';
-import {Button, Portal, TextInput, useTheme} from 'react-native-paper';
+import {Button, TextInput, useTheme} from 'react-native-paper';
 import {addMinutes, endOfMonth, format, parse, startOfMonth} from 'date-fns';
 import {
   createNewJob,
@@ -21,22 +21,11 @@ import {
 } from '../services/calendarService';
 import groupBy from 'lodash/groupBy';
 import Toast from 'react-native-toast-message';
-import {
-  Pressable,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import {SafeAreaView, StyleSheet, View} from 'react-native';
 import {createGlobalStyles} from '../utils/styles.ts';
 import CustomActivityIndicator from '../components/CustomActivityIndicator.tsx';
-import Modal from 'react-native-modal';
-import {Controller, useForm} from 'react-hook-form';
 import {getCleanerList} from '../services/cleanersService.ts';
 import {getCarList} from '../services/carsService.ts';
-import {Picker} from '@react-native-picker/picker';
-import DatePicker from 'react-native-date-picker';
 import {LogBox} from 'react-native';
 import {debounce} from 'lodash';
 import {PaymentSheetError, useStripe} from '@stripe/stripe-react-native';
@@ -45,6 +34,8 @@ import {selectAuthState, userLoggedIn} from '../store/authSlice.ts';
 import {STORAGE_KEY} from '../utils/constantKey.ts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useRoleAndPermission} from '../context/RoleAndPermissionContext.tsx';
+import AddJobModal from '../components/AddJobModal.tsx';
+import EventModal from '../components/EventModal.tsx';
 
 LogBox.ignoreLogs([
   'ReactImageView',
@@ -65,28 +56,20 @@ const TimelineCalendarScreen = ({navigation}: Props) => {
   const [eventsByDate, setEventsByDate] = useState<Record<string, any>>({});
   const [marked, setMarked] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(false);
-  // const [selectEvent, setSelectedEvent] = useState<Record<string, any>>();
+  const [selectedEvent, setSelectedEvent] = useState<Record<string, any>>();
   const [visible, setVisible] = useState(false);
+  const [visibleEventModal, setVisibleEventModal] = useState(false);
   const [cars, setCars] = useState<Car[]>([]);
   // const [properties, setProperties] = useState<Property[]>([]);
+  const [allEvents, setAllEvents] = useState<Record<string, any>>();
   const [cleaners, setCleaners] = useState<Cleaner[]>([]);
   const [searchInput, setSearchInput] = useState('');
   const [debouncedKeyword, setDebouncedKeyword] = useState('');
   const [currentMonth, setCurrentMonth] = useState(
     format(new Date(), 'yyyy-MM'),
   );
-  const [openStartDatePicker, setOpenStartDatePicker] = useState(false);
-  const [openEndDatePicker, setOpenEndDatePicker] = useState(false);
   const {initPaymentSheet, presentPaymentSheet} = useStripe();
   const dispatch = useAppDispatch();
-
-  const {
-    control,
-    handleSubmit,
-    formState: {errors},
-    setValue,
-    getValues,
-  } = useForm<JobDetailedFormData>();
 
   const onSubmit = async (data: JobDetailedFormData) => {
     if (loading) {
@@ -199,6 +182,7 @@ const TimelineCalendarScreen = ({navigation}: Props) => {
           const dateKey = CalendarUtils.getCalendarDateString(ev.start);
           marks[dateKey] = {marked: true};
         });
+        setAllEvents(data);
         setMarked(marks);
       } catch (error: any) {
         console.log('Error fetching events:', error);
@@ -223,7 +207,8 @@ const TimelineCalendarScreen = ({navigation}: Props) => {
   };
 
   const onEventPress = (event: TimelineEventProps) => {
-    // setSelectedEvent(event);
+    setSelectedEvent(event);
+    setVisibleEventModal(true);
     console.log(event);
   };
 
@@ -296,6 +281,24 @@ const TimelineCalendarScreen = ({navigation}: Props) => {
         dispatch(userLoggedIn({...userData}));
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({...userData}));
       }
+    }
+  };
+
+  const getNextEvent = (event: Record<string, any>) => {
+    let eventId = Number(event.id);
+    let start = event.start_time;
+    var nextEventId: number;
+    if (start) {
+      nextEventId = eventId + 1;
+    } else {
+      nextEventId = eventId - 1;
+    }
+    const nextEvent = allEvents?.find(
+      (ev: Record<string, any>) => ev.id === nextEventId,
+    );
+    setSelectedEvent(nextEvent);
+    if (!nextEvent) {
+      setVisibleEventModal(false);
     }
   };
 
@@ -428,284 +431,26 @@ const TimelineCalendarScreen = ({navigation}: Props) => {
           scrollToFirst
         />
       </CalendarProvider>
-      <Portal>
-        <Modal isVisible={visible} style={[globalStyles.modalContainerBack]}>
-          <ScrollView
-            style={{
-              flex: 1,
-              width: '100%',
-              backgroundColor: 'white',
-              padding: 16,
-              borderRadius: 10,
-            }}>
-            <View
-              style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-              <View
-                style={{
-                  flex: 1,
-                  width: '100%',
-                }}>
-                <View style={{marginBottom: 10}}>
-                  <Text style={{fontSize: 20}}>Add New Job</Text>
-                </View>
-                {cars.length ? (
-                  <>
-                    <View
-                      style={{
-                        borderWidth: 1,
-                        borderColor: theme.colors.secondary,
-                        borderRadius: 4,
-                      }}>
-                      <Controller
-                        control={control}
-                        rules={{
-                          required: {
-                            message: AppConstants.ERROR_CarRequired,
-                            value: true,
-                          },
-                        }}
-                        render={({field: {onChange, value}}) => (
-                          <Picker
-                            onValueChange={onChange}
-                            selectedValue={value}
-                            placeholder={AppConstants.LABEL_Car}>
-                            {cars.map(c => (
-                              <Picker.Item
-                                value={c.id}
-                                label={c.name}
-                                key={c.id}
-                              />
-                            ))}
-                          </Picker>
-                        )}
-                        name="car_id"
-                      />
-                    </View>
-                    <View style={globalStyles.errorField}>
-                      {errors.car_id?.message && (
-                        <Text style={globalStyles.errorText}>
-                          {errors.car_id?.message}
-                        </Text>
-                      )}
-                    </View>
-                  </>
-                ) : null}
-
-                <Controller
-                  control={control}
-                  rules={{}}
-                  render={({field: {onChange, onBlur, value}}) => (
-                    <TextInput
-                      label={AppConstants.LABEL_DeliveryLocation}
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      mode="outlined"
-                      placeholder={AppConstants.LABEL_DeliveryLocation}
-                      textContentType="none"
-                      style={globalStyles.textInput}
-                    />
-                  )}
-                  name="delivery_location"
-                />
-                <View style={{marginBottom: 16}} />
-                <Controller
-                  control={control}
-                  rules={{}}
-                  render={({field: {onChange, onBlur, value}}) => (
-                    <TextInput
-                      label={AppConstants.LABEL_Returnlocation}
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      mode="outlined"
-                      placeholder={AppConstants.LABEL_Returnlocation}
-                      textContentType="none"
-                      style={globalStyles.textInput}
-                    />
-                  )}
-                  name="return_location"
-                />
-                <View style={{marginBottom: 16}} />
-                <Controller
-                  control={control}
-                  rules={{}}
-                  render={({field: {onChange, onBlur, value}}) => (
-                    <TextInput
-                      label={AppConstants.LABEL_Abouttheguest}
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      mode="outlined"
-                      placeholder={AppConstants.LABEL_Abouttheguest}
-                      textContentType="none"
-                      style={globalStyles.textInput}
-                    />
-                  )}
-                  name="about_guest"
-                />
-                <View style={{marginBottom: 16}} />
-                <View
-                  style={{
-                    borderWidth: 1,
-                    borderColor: theme.colors.secondary,
-                    borderRadius: 4,
-                  }}>
-                  <Controller
-                    control={control}
-                    rules={{
-                      required: {
-                        message: AppConstants.ERROR_ManagerRequired,
-                        value: true,
-                      },
-                    }}
-                    render={({field: {onChange, value}}) => (
-                      <Picker
-                        onValueChange={onChange}
-                        selectedValue={value}
-                        placeholder={AppConstants.LABEL_AssignManager}>
-                        {cleaners.map(c => (
-                          <Picker.Item
-                            value={c.id}
-                            label={`${c.first_name} ${c.last_name}`}
-                            key={c.id}
-                          />
-                        ))}
-                      </Picker>
-                    )}
-                    name="assigned_to"
-                  />
-                </View>
-                <View style={globalStyles.errorField}>
-                  {errors.assigned_to?.message && (
-                    <Text style={globalStyles.errorText}>
-                      {errors.assigned_to?.message}
-                    </Text>
-                  )}
-                </View>
-                <View
-                  style={{
-                    borderWidth: 1,
-                    borderColor: theme.colors.secondary,
-                    borderRadius: 4,
-                  }}>
-                  <Controller
-                    control={control}
-                    rules={{}}
-                    render={({field: {onChange, value}}) => (
-                      <Picker
-                        onValueChange={onChange}
-                        selectedValue={value}
-                        placeholder={AppConstants.LABEL_SecondaryManager}>
-                        {cleaners.map(c => (
-                          <Picker.Item
-                            value={c.id}
-                            label={`${c.first_name} ${c.last_name}`}
-                            key={c.id}
-                          />
-                        ))}
-                      </Picker>
-                    )}
-                    name="secondary_assigned_to"
-                  />
-                </View>
-                <View style={{marginBottom: 16}} />
-                <Controller
-                  control={control}
-                  rules={{}}
-                  render={({field: {onChange, onBlur, value}}) => (
-                    <Pressable onPress={() => setOpenStartDatePicker(true)}>
-                      <TextInput
-                        label={AppConstants.LABEL_TripStartDate}
-                        onBlur={onBlur}
-                        onChangeText={onChange}
-                        value={value}
-                        mode="outlined"
-                        placeholder={AppConstants.LABEL_TripStartDate}
-                        textContentType="none"
-                        style={globalStyles.textInput}
-                        readOnly
-                        // Make the input read-only to prevent keyboard popup
-                      />
-                    </Pressable>
-                  )}
-                  name="start"
-                />
-                <View style={{marginBottom: 16}} />
-                <Controller
-                  control={control}
-                  rules={{}}
-                  render={({field: {onChange, onBlur, value}}) => (
-                    <Pressable onPress={() => setOpenEndDatePicker(true)}>
-                      <TextInput
-                        label={AppConstants.LABEL_TripEndDate}
-                        onBlur={onBlur}
-                        onChangeText={onChange}
-                        value={value}
-                        mode="outlined"
-                        placeholder={AppConstants.LABEL_TripEndDate}
-                        textContentType="none"
-                        style={globalStyles.textInput}
-                        readOnly
-                        // Make the input read-only to prevent keyboard popup
-                      />
-                    </Pressable>
-                  )}
-                  name="end"
-                />
-                <View
-                  style={{
-                    flex: 1,
-                    flexDirection: 'row',
-                    justifyContent: 'flex-end',
-                    gap: 4,
-                    marginTop: 20,
-                  }}>
-                  <Button
-                    onPress={() => setVisible(false)}
-                    mode="contained"
-                    style={globalStyles.dangerModalButton}>
-                    {AppConstants.TITLE_Cancel}
-                  </Button>
-                  <Button
-                    onPress={handleSubmit(onSubmit)}
-                    mode="contained"
-                    style={globalStyles.defaultModalButton}>
-                    {AppConstants.TITLE_Save}
-                  </Button>
-                </View>
-              </View>
-              <CustomActivityIndicator loading={loading} />
-            </View>
-          </ScrollView>
-          <DatePicker
-            modal
-            open={openStartDatePicker}
-            date={
-              getValues('start') ? new Date(getValues('start')) : new Date()
-            }
-            onConfirm={date => {
-              setValue('start', date.toLocaleString());
-              setOpenStartDatePicker(false); // Close the modal after confirmation
-            }}
-            onCancel={() => {
-              setOpenStartDatePicker(false); // Close the modal when cancelled
-            }}
-          />
-          <DatePicker
-            modal
-            open={openEndDatePicker}
-            date={getValues('end') ? new Date(getValues('end')) : new Date()}
-            onConfirm={date => {
-              setValue('end', date.toLocaleString());
-              setOpenEndDatePicker(false); // Close the modal after confirmation
-            }}
-            onCancel={() => {
-              setOpenEndDatePicker(false); // Close the modal when cancelled
-            }}
-          />
-        </Modal>
-      </Portal>
+      <AddJobModal
+        visible={visible}
+        onClose={() => setVisible(false)}
+        cars={cars}
+        cleaners={cleaners}
+        loading={loading}
+        onSubmit={onSubmit}
+      />
+      <EventModal
+        visible={visibleEventModal}
+        onClose={() => {
+          setVisibleEventModal(false);
+          setSelectedEvent(undefined);
+        }}
+        cars={cars}
+        cleaners={cleaners}
+        event={selectedEvent}
+        getNextEvent={getNextEvent}
+        onRefresh={() => fetchFilteredEvents(currentDate, '', true)}
+      />
 
       <CustomActivityIndicator loading={loading} />
     </SafeAreaView>
