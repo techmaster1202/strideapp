@@ -1,6 +1,6 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Button, Portal, TextInput, useTheme} from 'react-native-paper';
-import {Pressable, ScrollView, Text, View} from 'react-native';
+import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {Picker} from '@react-native-picker/picker';
 import DatePicker from 'react-native-date-picker';
 import Modal from 'react-native-modal';
@@ -31,17 +31,52 @@ const AddJobModal = ({
   const globalStyles = createGlobalStyles(theme);
   const [openStartDatePicker, setOpenStartDatePicker] = useState(false);
   const [openEndDatePicker, setOpenEndDatePicker] = useState(false);
+  const [cleanerList, setCleanerList] = useState(cleaners);
   const {
     control,
     handleSubmit,
     formState: {errors},
     setValue,
     getValues,
+    reset,
+    watch,
   } = useForm<JobDetailedFormData>();
+
+  const car_id = watch('car_id');
+
+  useEffect(() => {
+    setCleanerList(cleaners);
+  }, [cleaners]);
+
+  useEffect(() => {
+    if (car_id) {
+      const foundCar = cars.find(c => c.id === car_id);
+      if (foundCar?.selective_assign) {
+        if (
+          !cleanerList?.some(c => c?.id === (foundCar?.selective_assign as any))
+        ) {
+          setCleanerList([
+            {
+              first_name: foundCar.cleaner?.cleaner_first_name,
+              last_name: foundCar.cleaner?.cleaner_last_name,
+              id: foundCar.cleaner?.id,
+            } as Cleaner,
+            ...cleanerList,
+          ]);
+        }
+        setValue(
+          'assigned_to',
+          foundCar?.selective_assign as unknown as number,
+        );
+      }
+    }
+  }, [cars, car_id, cleanerList]);
 
   return (
     <Portal>
-      <Modal isVisible={visible} style={[globalStyles.modalContainerBack]}>
+      <Modal
+        isVisible={visible}
+        style={[[globalStyles.modalContainerBack, {padding: 0}]]}>
         <ScrollView
           style={{
             flex: 1,
@@ -51,7 +86,12 @@ const AddJobModal = ({
             borderRadius: 10,
           }}>
           <View
-            style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+            style={{
+              flex: 1,
+              alignItems: 'center',
+              justifyContent: 'center',
+              paddingBottom: 32,
+            }}>
             <View
               style={{
                 flex: 1,
@@ -62,6 +102,7 @@ const AddJobModal = ({
               </View>
               {cars.length ? (
                 <>
+                  <Text style={[styles.label]}>Car: *</Text>
                   <View
                     style={{
                       borderWidth: 1,
@@ -78,6 +119,7 @@ const AddJobModal = ({
                       }}
                       render={({field: {onChange, value}}) => (
                         <Picker
+                          mode="dropdown"
                           onValueChange={onChange}
                           selectedValue={value}
                           placeholder={AppConstants.LABEL_Car}>
@@ -157,6 +199,7 @@ const AddJobModal = ({
                 name="about_guest"
               />
               <View style={{marginBottom: 16}} />
+              <Text style={[styles.label]}>Assign Manager: *</Text>
               <View
                 style={{
                   borderWidth: 1,
@@ -173,10 +216,11 @@ const AddJobModal = ({
                   }}
                   render={({field: {onChange, value}}) => (
                     <Picker
+                      mode="dropdown"
                       onValueChange={onChange}
                       selectedValue={value}
                       placeholder={AppConstants.LABEL_AssignManager}>
-                      {cleaners.map(c => (
+                      {cleanerList.map(c => (
                         <Picker.Item
                           value={c.id}
                           label={`${c.first_name} ${c.last_name}`}
@@ -195,6 +239,7 @@ const AddJobModal = ({
                   </Text>
                 )}
               </View>
+              <Text style={[styles.label]}>Secondary Manager</Text>
               <View
                 style={{
                   borderWidth: 1,
@@ -206,10 +251,14 @@ const AddJobModal = ({
                   rules={{}}
                   render={({field: {onChange, value}}) => (
                     <Picker
+                      mode="dropdown"
                       onValueChange={onChange}
                       selectedValue={value}
                       placeholder={AppConstants.LABEL_SecondaryManager}>
-                      {cleaners.map(c => (
+                      {[
+                        {id: '', first_name: 'None', last_name: ''},
+                        ...cleanerList,
+                      ].map(c => (
                         <Picker.Item
                           value={c.id}
                           label={`${c.first_name} ${c.last_name}`}
@@ -222,6 +271,9 @@ const AddJobModal = ({
                 />
               </View>
               <View style={{marginBottom: 16}} />
+              <Text style={[styles.label]}>
+                {AppConstants.LABEL_TripStartDate}
+              </Text>
               <Controller
                 control={control}
                 rules={{}}
@@ -244,6 +296,9 @@ const AddJobModal = ({
                 name="start"
               />
               <View style={{marginBottom: 16}} />
+              <Text style={[styles.label]}>
+                {AppConstants.LABEL_TripEndDate}
+              </Text>
               <Controller
                 control={control}
                 rules={{}}
@@ -269,18 +324,21 @@ const AddJobModal = ({
                 style={{
                   flex: 1,
                   flexDirection: 'row',
-                  justifyContent: 'flex-end',
+                  justifyContent: 'space-between',
                   gap: 4,
                   marginTop: 20,
                 }}>
                 <Button
-                  onPress={onClose}
+                  onPress={() => {
+                    reset();
+                    onClose();
+                  }}
                   mode="contained"
                   style={globalStyles.dangerModalButton}>
                   {AppConstants.TITLE_Cancel}
                 </Button>
                 <Button
-                  onPress={handleSubmit(onSubmit)}
+                  onPress={() => handleSubmit(onSubmit)().then(() => reset())}
                   mode="contained"
                   style={globalStyles.defaultModalButton}>
                   {AppConstants.TITLE_Save}
@@ -318,5 +376,13 @@ const AddJobModal = ({
     </Portal>
   );
 };
+
+const styles = StyleSheet.create({
+  label: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginBottom: 6,
+  },
+});
 
 export default AddJobModal;

@@ -57,6 +57,8 @@ const TimelineCalendarScreen = ({navigation}: Props) => {
   const [marked, setMarked] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Record<string, any>>();
+  const [selectedNextEvent, setSelectedNextEvent] =
+    useState<Record<string, any>>();
   const [visible, setVisible] = useState(false);
   const [visibleEventModal, setVisibleEventModal] = useState(false);
   const [cars, setCars] = useState<Car[]>([]);
@@ -142,7 +144,7 @@ const TimelineCalendarScreen = ({navigation}: Props) => {
           `monthStr: ${monthStr}, currentMonth: ${currentMonth} fetching new data`,
         );
         const respData = await getCalendarEvents({start, end, q});
-        const data = respData.map((ev: Record<string, any>) => {
+        const data = respData?.map?.((ev: Record<string, any>) => {
           let color = '#4a6bdc';
           if (ev.appointment_type === 1) {
             if (ev.start_time) {
@@ -207,9 +209,10 @@ const TimelineCalendarScreen = ({navigation}: Props) => {
   };
 
   const onEventPress = (event: TimelineEventProps) => {
+    const nextEvent = getNextEvent(event);
     setSelectedEvent(event);
+    setSelectedNextEvent(nextEvent);
     setVisibleEventModal(true);
-    console.log(event);
   };
 
   const handleChangeSearch = useMemo(
@@ -288,18 +291,27 @@ const TimelineCalendarScreen = ({navigation}: Props) => {
     let eventId = Number(event.id);
     let start = event.start_time;
     var nextEventId: number;
+    console.log('start time');
+    console.log(start);
     if (start) {
       nextEventId = eventId + 1;
     } else {
       nextEventId = eventId - 1;
     }
-    const nextEvent = allEvents?.find(
+
+    const currentEvent = allEvents?.find(
       (ev: Record<string, any>) => ev.id === nextEventId,
     );
-    setSelectedEvent(nextEvent);
-    if (!nextEvent) {
+    setSelectedEvent(currentEvent);
+    if (!currentEvent) {
       setVisibleEventModal(false);
+    } else {
+      const nextEvent = allEvents?.find(
+        (ev: Record<string, any>) => ev.id === currentEvent.id + 1,
+      );
+      setSelectedNextEvent(nextEvent);
     }
+    return currentEvent;
   };
 
   useEffect(() => {
@@ -439,18 +451,21 @@ const TimelineCalendarScreen = ({navigation}: Props) => {
         loading={loading}
         onSubmit={onSubmit}
       />
-      <EventModal
-        visible={visibleEventModal}
-        onClose={() => {
-          setVisibleEventModal(false);
-          setSelectedEvent(undefined);
-        }}
-        cars={cars}
-        cleaners={cleaners}
-        event={selectedEvent}
-        getNextEvent={getNextEvent}
-        onRefresh={() => fetchFilteredEvents(currentDate, '', true)}
-      />
+      {selectedEvent ? (
+        <EventModal
+          visible={visibleEventModal}
+          onClose={() => {
+            setVisibleEventModal(false);
+            setSelectedEvent(undefined);
+          }}
+          cars={cars}
+          cleaners={cleaners}
+          event={selectedEvent}
+          getNextEvent={getNextEvent}
+          onRefresh={() => fetchFilteredEvents(currentDate, '', true)}
+          nextEvent={selectedNextEvent}
+        />
+      ) : null}
 
       <CustomActivityIndicator loading={loading} />
     </SafeAreaView>
