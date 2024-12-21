@@ -27,7 +27,7 @@ import {
 } from '../services/calendarService';
 import Toast from 'react-native-toast-message';
 import ConfirmModal from './ConfirmModal';
-import {format, isValid, parse} from 'date-fns';
+import {format, isValid, parse, parseISO} from 'date-fns';
 import FileUploader from './FileUploader';
 import {getMimeType} from '../utils/helpers';
 import {uploadAttachmentFile} from '../services/cleanersService';
@@ -37,6 +37,7 @@ interface IProps {
   cars: Car[];
   cleaners: Cleaner[];
   event?: Record<string, any>;
+  nextEvent?: Record<string, any>;
   onClose: () => void;
   onRefresh?: () => Promise<void>;
   getNextEvent: (event: Record<string, any>) => void;
@@ -68,6 +69,7 @@ const EventModal = ({
   cars,
   cleaners,
   event,
+  nextEvent,
   onClose,
   getNextEvent,
   onRefresh,
@@ -82,7 +84,7 @@ const EventModal = ({
   const [showFinishConfirm, setShowFinishConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [photos, setPhotos] = useState<Record<string, any>[]>([]);
-  const [dropOff, setDropOff] = useState(true);
+  const [cleanerList, setCleanerList] = useState(cleaners);
 
   const {
     control,
@@ -95,16 +97,17 @@ const EventModal = ({
   const carId = watch('car_id');
   const startD = watch('start');
   const endD = watch('end');
+  const [nextEventTime, setNextEventTime] = useState('');
 
+  useEffect(() => {
+    setCleanerList(cleaners);
+  }, [cleaners]);
   useEffect(() => {
     if (event) {
       setValue('id', event.id);
       setValue('property_id', event.property?.id);
       setValue('description', event.description);
-      setValue(
-        'start',
-        event.start_time ? event.start_time : event.start ? event.start : '',
-      );
+      setValue('start', event.start_time ? event.start_time : '');
       setValue('end', event.end_time ? event.end_time : '');
       setValue('summary', event.summary ? event.summary : '');
       setValue('car_id', event.car ? event.car.id : '');
@@ -124,11 +127,37 @@ const EventModal = ({
         event.secondary_assigned_to ? event.secondary_assigned_to : '',
       );
       setValue('first_name', authState.user?.first_name);
-      setValue('first_name', authState.user?.last_name);
+      setValue('last_name', authState.user?.last_name);
       setPhotos(event?.photos?.length ? event?.photos : []);
-      setDropOff(!event.start_time);
+
+      if (nextEvent && nextEvent.appointment_type === 1) {
+        if (nextEvent.start_time) {
+          setNextEventTime(
+            'Drop off Date: ' +
+              format(parseISO(nextEvent.start_time), 'EEEE, MMMM do, yyyy'),
+          );
+        } else if (nextEvent.end_time) {
+          setNextEventTime(
+            'Pick up Date: ' +
+              format(parseISO(nextEvent.end_time), 'EEEE, MMMM do, yyyy'),
+          );
+        }
+      }
+
+      if (!cleaners?.some(c => c?.id === event?.cleaner?.id)) {
+        setCleanerList([
+          {id: '', first_name: 'None', last_name: ''},
+          event?.cleaner,
+          ...cleaners,
+        ]);
+      } else {
+        setCleanerList([
+          {id: '', first_name: 'None', last_name: ''} as any,
+          ...cleaners,
+        ]);
+      }
     }
-  }, [event]);
+  }, [event, nextEvent, cleaners]);
 
   useEffect(() => {
     if (cars && carId) {
@@ -219,12 +248,8 @@ const EventModal = ({
       const payload = {...formData};
       payload.assigned_to = formData.cleaner_id;
       payload.secondary_assigned_to = formData.secondary_cleaner_id;
-      console.log(`startD ${startD}`);
-      console.log(`endD ${endD}`);
       payload.start = parseAndFormatDate(startD);
-      console.log(payload.start);
       payload.end = parseAndFormatDate(endD);
-      console.log(`end ${payload.end}`);
 
       if (formData.start_datepicker) {
         payload.start = `${format(
@@ -312,7 +337,9 @@ const EventModal = ({
 
   return (
     <Portal>
-      <Modal isVisible={visible} style={[globalStyles.modalContainerBack]}>
+      <Modal
+        isVisible={visible}
+        style={[globalStyles.modalContainerBack, {padding: 0}]}>
         <ScrollView
           style={{
             flex: 1,
@@ -365,10 +392,12 @@ const EventModal = ({
                   }}
                   render={({field: {onChange, value}}) => (
                     <Picker
+                      mode="dropdown"
+                      enabled={false}
                       onValueChange={onChange}
                       selectedValue={value}
                       placeholder={AppConstants.LABEL_AssignManager}>
-                      {cleaners.map(c => (
+                      {cleanerList.map(c => (
                         <Picker.Item
                           value={c.id}
                           label={`${c.first_name} ${c.last_name}`}
@@ -399,10 +428,11 @@ const EventModal = ({
                   rules={{}}
                   render={({field: {onChange, value}}) => (
                     <Picker
+                      mode="dropdown"
                       onValueChange={onChange}
                       selectedValue={value}
                       placeholder={AppConstants.LABEL_SecondaryManager}>
-                      {cleaners.map(c => (
+                      {cleanerList.map(c => (
                         <Picker.Item
                           value={c.id}
                           label={`${c.first_name} ${c.last_name}`}
@@ -434,6 +464,7 @@ const EventModal = ({
                       }}
                       render={({field: {onChange, value}}) => (
                         <Picker
+                          mode="dropdown"
                           onValueChange={onChange}
                           selectedValue={value}
                           placeholder={AppConstants.LABEL_Car}>
@@ -466,7 +497,7 @@ const EventModal = ({
                   Vehicle Color: {selectedCar?.color}
                 </Text>
               </View>
-              {dropOff ? (
+              {startD ? (
                 <Controller
                   control={control}
                   rules={{}}
@@ -484,7 +515,7 @@ const EventModal = ({
                   )}
                   name="delivery_location"
                 />
-              ) : (
+              ) : endD ? (
                 <>
                   <View style={{marginBottom: 16}} />
                   <Controller
@@ -505,7 +536,7 @@ const EventModal = ({
                     name="return_location"
                   />
                 </>
-              )}
+              ) : null}
               <View style={{marginBottom: 16}} />
               <Controller
                 control={control}
@@ -576,6 +607,9 @@ const EventModal = ({
                   />
                 </>
               ) : null}
+              <Text style={[styles.label, {marginVertical: 5, fontSize: 12}]}>
+                {nextEventTime}
+              </Text>
               <View style={{marginVertical: 10}}>
                 <FileUploader
                   label="Photos"
@@ -590,8 +624,9 @@ const EventModal = ({
                   flex: 1,
                   flexDirection: 'row',
                   justifyContent: 'center',
-                  gap: 4,
+                  gap: 10,
                   marginTop: 10,
+                  flexWrap: 'wrap',
                 }}>
                 {hasAnyPermission?.('delete-appointments') ? (
                   <Button

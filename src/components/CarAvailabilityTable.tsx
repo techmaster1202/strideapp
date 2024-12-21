@@ -1,8 +1,9 @@
-import React, {useEffect, useState, useRef} from 'react';
-import {View, Text, ScrollView, StyleSheet} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {View, Text, StyleSheet} from 'react-native';
 import {Car} from '../types';
 import {format} from 'date-fns';
 import {IconButton} from 'react-native-paper';
+import {ScrollView} from 'react-native-gesture-handler';
 
 interface IProps {
   cars: Car[];
@@ -21,21 +22,11 @@ const CarAvailabilityTable = ({
   const formatDay = (date: Date) => format(date, 'EEE');
   const [carData, setCarData] = useState<Car[]>([]);
   const [dateData, setDateData] = useState<Date[]>([]);
-  const horizontalScrollRef = useRef<ScrollView>(null);
-  const contentScrollRef = useRef<ScrollView>(null);
 
   useEffect(() => {
     setCarData([{id: 0, name: 'Car Name'} as any, ...cars]);
     setDateData([...dates]);
   }, [cars, dates]);
-
-  const handleHorizontalScroll = (event: any) => {
-    const offsetX = event.nativeEvent.contentOffset.x;
-    if (horizontalScrollRef.current && contentScrollRef.current) {
-      horizontalScrollRef.current.scrollTo({x: offsetX, animated: false});
-      contentScrollRef.current.scrollTo({x: offsetX, animated: false});
-    }
-  };
 
   return (
     <View style={styles.container}>
@@ -55,52 +46,41 @@ const CarAvailabilityTable = ({
       </View>
 
       <View style={styles.tableContainer}>
-        {/* Header */}
-        <View style={styles.headerContainer}>
-          <View style={styles.nameBox}>
-            <Text>{carData[0]?.name}</Text>
-          </View>
-          <ScrollView
-            ref={horizontalScrollRef}
-            horizontal
-            scrollEventThrottle={16}
-            onScroll={handleHorizontalScroll}
-            showsHorizontalScrollIndicator={false}>
-            <View style={styles.headerRow}>
-              {dateData.map((date, dateIndex) => (
-                <View style={[styles.box, styles.headerBox]} key={dateIndex}>
-                  <Text>{formatDate(date)}</Text>
-                  <Text>{formatDay(date)}</Text>
-                </View>
-              ))}
-            </View>
-          </ScrollView>
-        </View>
-
-        {/* Content */}
         <ScrollView style={styles.contentContainer}>
           <View style={styles.contentRow}>
             <View>
-              {carData.slice(1).map((car, index) => (
+              {carData.map((car, index) => (
                 <View
                   style={[
                     styles.box,
                     styles.nameBox,
                     index === cars.length - 1 ? styles.lastBox : {},
+                    {borderRightWidth: 1},
                   ]}
                   key={car.id}>
-                  <Text>{car.name}</Text>
+                  <Text style={[index !== 0 ? {fontSize: 12} : {}]}>
+                    {car.name}
+                  </Text>
                 </View>
               ))}
             </View>
 
-            <ScrollView
-              ref={contentScrollRef}
-              horizontal
-              scrollEventThrottle={16}
-              onScroll={handleHorizontalScroll}
-              showsHorizontalScrollIndicator={false}>
+            <ScrollView horizontal>
               <View>
+                <View style={[styles.headerRow]}>
+                  {dateData.map((date, dateIndex) => (
+                    <View
+                      style={[
+                        styles.box,
+                        styles.headerBox,
+                        dateIndex === 0 ? {borderLeftWidth: 0} : {},
+                      ]}
+                      key={dateIndex}>
+                      <Text>{formatDate(date)}</Text>
+                      <Text>{formatDay(date)}</Text>
+                    </View>
+                  ))}
+                </View>
                 {carData.slice(1).map((car, carIndex) => (
                   <View style={styles.row} key={car.id}>
                     {dateData.map((date, dateIndex) => (
@@ -109,6 +89,7 @@ const CarAvailabilityTable = ({
                           styles.box,
                           carIndex === cars.length - 1 ? styles.lastBox : {},
                           carIndex % 2 !== 0 ? styles.odd : {},
+                          dateIndex === 0 ? {borderLeftWidth: 0} : {},
                         ]}
                         key={dateIndex}>
                         {isCarRented(car.id, date) ? (
